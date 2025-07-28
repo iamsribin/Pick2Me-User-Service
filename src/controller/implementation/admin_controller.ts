@@ -12,11 +12,14 @@ export class AdminController implements IAdminController {
    * @param call - Empty request object
    * @param callback - Callback to return the active users or error
    */
+
   async getActiveUser(
     call: { request: {} },
     callback: ControllerCallback<AdminGetDataResponse>
   ): Promise<void> {
     try {
+      console.log("get Activ");
+      
       const response = await this.AdminService.getUserWithStatus('Good');
       const users = response.data;
       callback(null, { Users: users });

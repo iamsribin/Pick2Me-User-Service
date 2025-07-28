@@ -6,6 +6,6 @@ export interface ServiceResponse {
 }
 
 export interface ILoginService {
-  checkLoginUser(mobile: number): Promise<ServiceResponse>;
+  checkLoginUser(mobile: string): Promise<ServiceResponse>;
   checkGoogleUser(email: string): Promise<ServiceResponse>;
 }

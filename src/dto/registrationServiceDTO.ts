@@ -2,7 +2,7 @@
 export interface UserData {
   name: string;
   email: string;
-  mobile: number;
+  mobile: string;
   password: string;
   reffered_Code?: string;
   userImage?: string | null;

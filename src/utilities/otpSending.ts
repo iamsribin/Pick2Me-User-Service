@@ -7,6 +7,8 @@ const auth = new AuthService();
 export const sendOtp=async(email:string,name:string)=>{
     try {
         const otp = generateOTP();
+        console.log("otp",otp);
+        
         const token = await auth.createToken(otp,'2d',"Otp");        
         const subject = "Otp Verification";
         const text = `Hello ${name},\n\nThank you for registering with Retro-Routes!, your OTP is ${otp}\n\nHave a nice day!!!`;

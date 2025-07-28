@@ -15,15 +15,18 @@ export default class AdminService implements IAdminService {
    * @returns Promise resolving to the users
    * @throws Error if retrieval fails
    */
-  async getUserWithStatus(status: 'Good' | 'Block'): Promise<ServiceResponse> {
+  async getUserWithStatus(status: 'Good' | 'Block'): Promise<any> {
     try {
-      validateInput({ status });
       const users = await this.userRepo.findUserWithStatus(status);
+      console.log("users",users);
+      
       return {
         message: `${status === 'Good' ? 'Active' : 'Blocked'} users retrieved successfully`,
         data: users,
       };
     } catch (error) {
+      console.log(error);
+      
       throw handleControllerError(error, 'User data retrieval');
     }
   }

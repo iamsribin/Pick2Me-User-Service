@@ -109,13 +109,28 @@
 //     "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
 //   }
 // }
+// {
+//   "compilerOptions": {
+//     "module": "CommonJS",
+//     "moduleResolution": "Node",
+//     "target": "ESNext",
+//     "esModuleInterop": true,
+//     "strict": true
+//   },
+//   "exclude": ["node_modules"]
+// }
+
 {
   "compilerOptions": {
     "module": "CommonJS",
     "moduleResolution": "Node",
     "target": "ESNext",
     "esModuleInterop": true,
-    "strict": true
+    "strict": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "skipLibCheck": true,
+    "outDir": "./dist"
   },
   "exclude": ["node_modules"]
 }

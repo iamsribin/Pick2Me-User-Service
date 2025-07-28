@@ -13,10 +13,11 @@ export default class LoginController implements ILoginController {
    * @param callback - Callback to return the authentication result or error
    */
   async checkLoginUser(
-    call: { request: { mobile: number } },
+    call: { request: { mobile: string } },
     callback: ControllerCallback<CheckLoginUserResponse>
   ): Promise<void> {
     try {
+      
       const { mobile } = call.request;
       const response = await this.loginService.checkLoginUser(mobile);
       

@@ -26,7 +26,7 @@ export interface IRegistrationController {
   ): Promise<void>;
 
   checkUser(
-    call: { request: { mobile: number; email: string; name: string } },
+    call: { request: { mobile: string; email: string; name: string } },
     callback: ControllerCallback<CheckUserResponse>
   ): Promise<void>;
 

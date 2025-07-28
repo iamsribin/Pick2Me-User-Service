@@ -17,7 +17,7 @@ export class RegistrationService implements IRegistrationService {
    * @returns Promise resolving to the registration result
    * @throws Error if registration fails
    */
-  async user_registration(userData: UserData): Promise<ServiceResponse> {
+  async user_registration(userData: UserData): Promise<any> {
     const { name, email, mobile, password, reffered_Code, userImage } = userData;
 
     const referral_code = reffered_Code || generateReferralCode();
@@ -34,7 +34,7 @@ export class RegistrationService implements IRegistrationService {
 
     const response = await this.userRepo.saveUser(newUserData);
 
-    if (typeof response !== 'string' && response._id) {
+    if (typeof response !== 'string' && response.id) {
       return { message: 'User registered successfully', data: response };
     }
     throw new Error(typeof response === 'string' ? response : 'Failed to register user');
@@ -47,13 +47,20 @@ export class RegistrationService implements IRegistrationService {
    * @returns Promise resolving to the check result
    * @throws Error if user check fails
    */
-  async checkUser(mobile: number, email: string): Promise<ServiceResponse> {
-    const user = await this.userRepo.checkUser(mobile, email);
+  async checkUser(mobile: string, email: string): Promise<ServiceResponse> {
+    try {
+          const user = await this.userRepo.checkUser(mobile, email);
+console.log("mobile, email",mobile, email);
 
     if (user) {
       return { message: 'User already has an account', data: user };
     }
     return { message: 'User not registered' };
+    } catch (error) {
+      console.log("ervice errro",error);
+      return { message: 'internel error' };
+    }
+
   }
 }
 

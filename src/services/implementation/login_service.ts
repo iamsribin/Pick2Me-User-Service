@@ -23,8 +23,8 @@ export default class LoginService implements ILoginService {
     }
 
     const role = user.isAdmin ? 'Admin' : 'User';
-    const token = await this.authService.createToken(user._id.toString(), '15m', role);
-    const refreshToken = await this.authService.createToken(user._id.toString(), '7d', role);
+    const token = await this.authService.createToken(user.id.toString(), '15m', role);
+    const refreshToken = await this.authService.createToken(user.id.toString(), '7d', role);
 
     if (!token || !refreshToken) {
       throw new Error('Issue in token creation');
@@ -35,7 +35,7 @@ export default class LoginService implements ILoginService {
       data: {
         name: user.name,
         token,
-        _id: user._id.toString(),
+        _id: user.id.toString(),
         refreshToken,
         role,
         mobile:user.mobile,
@@ -50,7 +50,7 @@ export default class LoginService implements ILoginService {
    * @returns Promise resolving to the authentication result
    * @throws Error if authentication fails
    */
-  async checkLoginUser(mobile: number): Promise<ServiceResponse> {
+  async checkLoginUser(mobile: string): Promise<ServiceResponse> {
     try {
 
       const user = await this.userRepo.findUser(mobile);
@@ -61,6 +61,8 @@ export default class LoginService implements ILoginService {
 
       return await this.handleLogin(user);
     } catch (error) {
+      console.log("checkLoginUser err",error);
+      
       throw handleControllerError(error, 'User authentication');
     }
   }

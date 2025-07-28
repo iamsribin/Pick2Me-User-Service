@@ -28,7 +28,6 @@ export default class RegistrationController implements IRegistrationController {
   ): Promise<void> {
     try {
       const { name, email, mobile, password, reffered_Code, otp, userImage, token } = call.request;
-      validateInput({ name, email, mobile, password, reffered_Code, otp, token, userImage });
 
       const jwtOtp = this.authService.verifyOtpToken(token) as OtpPayload;
 
@@ -58,12 +57,14 @@ export default class RegistrationController implements IRegistrationController {
    * @param callback - Callback to return the check result or error
    */
   async checkUser(
-    call: { request: { mobile: number; email: string; name: string } },
+    call: { request: { mobile: string; email: string; name: string } },
     callback: ControllerCallback<CheckUserResponse>
   ): Promise<void> {
     try {
+      console.log("ethi...");
+      
       const { mobile, email, name } = call.request;
-      validateInput({ mobile, email, name });
+      // validateInput({ mobile, email, name });
 
       const response = await this.RegistrationService.checkUser(mobile, email);
 

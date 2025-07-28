@@ -13,7 +13,6 @@ export default class UserRepository implements IUserRepository {
    */
   async saveUser(userData: RegistrationData): Promise<UserInterface> {
     try {
-      validateInput(userData);
 
       const existingUser = await User.findOne();
       const newUser = new User({
@@ -41,9 +40,8 @@ export default class UserRepository implements IUserRepository {
    * @returns Promise resolving to the user or null
    * @throws Error if check fails
    */
-  async checkUser(mobile: number, email: string): Promise<UserInterface | null> {
+  async checkUser(mobile: string, email: string): Promise<UserInterface | null> {
     try {
-      validateInput({ mobile, email });
 
       const user = await User.findOne({ $or: [{ mobile }, { email }] });
       return user;
@@ -58,9 +56,8 @@ export default class UserRepository implements IUserRepository {
    * @returns Promise resolving to the user or null
    * @throws Error if search fails
    */
-  async findUser(mobile: number): Promise<UserInterface | null> {
+  async findUser(mobile: string): Promise<UserInterface | null> {
     try {
-      validateInput({ mobile });
       const user = await User.findOne({ mobile });
       return user;
     } catch (error) {
@@ -183,3 +180,6 @@ export default class UserRepository implements IUserRepository {
     }
   }
 }
+
+
+

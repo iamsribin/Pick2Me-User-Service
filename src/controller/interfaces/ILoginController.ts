@@ -24,7 +24,7 @@ export type ControllerCallback<T = CheckLoginUserResponse | CheckGoogleLoginUser
 
 export interface ILoginController {
   checkLoginUser(
-    call: { request: { mobile: number } },
+    call: { request: { mobile: string } },
     callback: ControllerCallback<CheckLoginUserResponse>
   ): Promise<void>;
 
