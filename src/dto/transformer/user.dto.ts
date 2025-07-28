@@ -2,7 +2,7 @@ import { Expose } from 'class-transformer';
 
 export class UserDto {
   @Expose()
-  _id!: string;
+  id!: string;
 
   @Expose()
   name!: string;
@@ -14,7 +14,7 @@ export class UserDto {
   mobile!: string;
 
   @Expose()
-  userImage!: string;
+  user_image!: string;
 
   @Expose()
   referral_code!: string;
@@ -23,5 +23,5 @@ export class UserDto {
   account_status!: string;
 
   @Expose()
-  joiningDate!: string;
+  joining_date!: string;
 }

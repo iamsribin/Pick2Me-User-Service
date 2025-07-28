@@ -1,10 +1,6 @@
-
-export interface ServiceResponse {
-  message: string;
-  data?: any;
-}
+import { LoginResponseDto } from '../../dto/response/login-response.dto';
 
 export interface ILoginService {
-  checkLoginUser(mobile: string): Promise<ServiceResponse>;
-  checkGoogleUser(email: string): Promise<ServiceResponse>;
+  authenticateUserByMobile(mobile: string): Promise<LoginResponseDto>;
+  authenticateUserByGoogle(email: string): Promise<LoginResponseDto>;
 }

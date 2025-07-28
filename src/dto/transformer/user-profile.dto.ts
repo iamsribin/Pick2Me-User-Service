@@ -2,7 +2,7 @@ import { Expose } from "class-transformer";
 
 export class UserProfileResponseDto {
   @Expose()
-  _id!: string;
+  id!: string;
   @Expose()
   name!: string;
   @Expose()
@@ -10,7 +10,7 @@ export class UserProfileResponseDto {
   @Expose()
   mobile!: string;
   @Expose()
-  userImage!: string;
+  user_image!: string;
   @Expose()
   referral_code!: string;
   @Expose()
@@ -24,7 +24,7 @@ export class UserProfileResponseDto {
   @Expose()
   cancelled_rides!: number;
   @Expose()
-  joiningDate!: string;
+  joining_date!: string;
   @Expose()
   reason!: string;
 }

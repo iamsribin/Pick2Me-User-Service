@@ -1,9 +1,11 @@
-import {UserRepository} from '../../repositories/implementation/user-repo';
+import { UserRepository } from '../../repositories/implementation/user-repo';
 import { AuthService } from '../../utilities/auth';
 import { ILoginService } from '../interfaces/i-login-service';
-import { IUser } from '../../interface/user.interface';
 import { handleControllerError } from '../../utilities/handleError';
 import { ServiceResponse } from '../../dto/serviceResponse';
+import { LoginResponseDto } from '../../dto/response/login-response.dto';
+import { LoginTransformer } from '../../dto/transformer/login-transformer.dto';
+import { User } from '../../entities/user.entity';
 
 export class LoginService implements ILoginService {
   constructor(
@@ -11,21 +13,36 @@ export class LoginService implements ILoginService {
     private readonly authService: AuthService
   ) {}
 
-  private async handleLogin(user: IUser): Promise<ServiceResponse> {
+  /**
+   * Handles the common login logic for both mobile and Google authentication
+   * @param user - User entity
+   * @returns ServiceResponse with authentication data
+   */
+  private async processUserAuthentication(user: User): Promise<ServiceResponse> {
+    // Check if user account is blocked
     if (user.account_status === 'Block') {
-      return { message: 'Blocked' };
+      return { 
+        message: 'Blocked',
+        data: null 
+      };
     }
 
+    // Determine user role
     const role = user.is_admin ? 'Admin' : 'User';
-    const token = await this.authService.createToken(user.id.toString(), '15m', role);
-    const refreshToken = await this.authService.createToken(user.id.toString(), '7d', role);
 
+    // Generate tokens
+    const [token, refreshToken] = await Promise.all([
+      this.authService.createToken(user.id.toString(), '15m', role),
+      this.authService.createToken(user.id.toString(), '7d', role)
+    ]);
+
+    // Validate token creation
     if (!token || !refreshToken) {
-      throw new Error('Issue in token creation');
+      throw new Error('Failed to generate authentication tokens');
     }
 
     return {
-      message: 'Success',
+      message: 'Authentication successful',
       data: {
         name: user.name,
         token,
@@ -38,32 +55,72 @@ export class LoginService implements ILoginService {
     };
   }
 
-  async checkLoginUser(mobile: string): Promise<ServiceResponse> {
-    try {
-      const user = await this.userRepo.findByMobile(mobile);
+  /**
+   * Validates user existence and processes authentication
+   * @param user - User entity or null
+   * @param errorContext - Context for error handling
+   * @returns LoginResponseDto
+   */
+  private async validateAndProcessUser(
+    user: User| null, 
+    errorContext: string
+  ): Promise<LoginResponseDto> {
+    if (!user) {
+      return LoginTransformer.transformToLoginResponse({
+        message: 'User not found. Please check your credentials.'
+      });
+    }
 
-      if (!user) {
-        return { message: 'No user found' };
+    const serviceResponse = await this.processUserAuthentication(user);
+    return LoginTransformer.transformToLoginResponse(serviceResponse);
+  }
+
+  /**
+   * Authenticates user by mobile number
+   * @param mobile - User's mobile number
+   * @returns LoginResponseDto
+   */
+  async authenticateUserByMobile(mobile: string): Promise<LoginResponseDto> {
+    try {
+      // Validate mobile number format
+      if (!mobile || typeof mobile !== 'string' || mobile.trim().length === 0) {
+        return LoginTransformer.transformToLoginResponse({
+          message: 'Please provide a valid mobile number.'
+        });
       }
 
-      return await this.handleLogin(user);
+      const user = await this.userRepo.findByMobile(mobile.trim());
+      if(user?.account_status =="Block"){
+      return await this.validateAndProcessUser(user, 'Blocke');
+      }
+      return await this.validateAndProcessUser(user, 'Mobile authentication');
+
     } catch (error) {
-      console.log("checkLoginUser err", error);
-      throw handleControllerError(error, 'User authentication');
+      console.error('Mobile authentication error:', error);
+      throw handleControllerError(error, 'Mobile authentication failed');
     }
   }
 
-  async checkGoogleUser(email: string): Promise<ServiceResponse> {
+  /**
+   * Authenticates user by Google email
+   * @param email - User's Google email
+   * @returns LoginResponseDto
+   */
+  async authenticateUserByGoogle(email: string): Promise<LoginResponseDto> {
     try {
-      const user = await this.userRepo.findByEmail(email);
-
-      if (!user) {
-        return { message: 'No user found' };
+      // Validate email format
+      if (!email || typeof email !== 'string' || email.trim().length === 0) {
+        return LoginTransformer.transformToLoginResponse({
+          message: 'Please provide a valid email address.'
+        });
       }
 
-      return await this.handleLogin(user);
+      const user = await this.userRepo.findByEmail(email.trim().toLowerCase());
+      return await this.validateAndProcessUser(user, 'Google authentication');
+
     } catch (error) {
-      throw handleControllerError(error, 'Google authentication');
+      console.error('Google authentication error:', error);
+      throw handleControllerError(error, 'Google authentication failed');
     }
   }
 }

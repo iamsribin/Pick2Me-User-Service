@@ -1,5 +1,5 @@
-import { IUserProfileGrpcResponse } from "../../dto/response/i-profile.dto";
-import { IUpdateUserStatusGrpcResponse, UserListDTO } from "../../dto/response/res-admin.dto";
+import { IUserDto, IUserProfileGrpcResponse } from "../../dto/response/i-profile.dto";
+import { IUpdateUserStatusGrpcResponse, UserListDTO } from "../../dto/response/admin-response.dto";
 import { IAdminService } from "../../services/interfaces/i-admin-service";
 import { handleControllerError } from "../../utilities/handleError";
 import {
@@ -51,12 +51,14 @@ export class AdminController implements IAdminController {
    */
 async getUserDetails(
   call: { request: { id: string } },
-  callback:  IAdminCallback<IUserProfileGrpcResponse>
+  callback:  IAdminCallback<IUserDto>
 ): Promise<void> {
   try {
     const { id } = call.request;
-    const response = await this._adminService.getUserDetails(id);
-    callback(null, response);
+    const data = await this._adminService.getUserDetails(id);
+    console.log("datadata",data);
+    
+    callback(null, data);
   } catch (error) {
     callback(handleControllerError(error, "User details retrieval"));
   }

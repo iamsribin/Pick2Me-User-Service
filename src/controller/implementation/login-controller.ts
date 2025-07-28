@@ -1,10 +1,12 @@
-import {LoginService} from '../../services/implementation/login-service';
 import { handleControllerError } from '../../utilities/handleError';
-import { ILoginController, ControllerCallback, CheckLoginUserResponse, CheckGoogleLoginUserResponse } from '../interfaces/i-login-controller';
+import { ILoginController, ControllerCallback } from '../interfaces/i-login-controller';
+import { LoginResponseDto } from '../../dto/response/login-response.dto';
+import { LoginByMobileRequestDto, LoginByGoogleRequestDto } from '../../dto/request/login-request.dto';
+import { ILoginService } from '../../services/interfaces/i-login-service';
 
 export class LoginController implements ILoginController {
   constructor(
-    private readonly loginService: LoginService
+    private readonly _loginService: ILoginService
   ) {}
 
   /**
@@ -13,24 +15,12 @@ export class LoginController implements ILoginController {
    * @param callback - Callback to return the authentication result or error
    */
   async checkLoginUser(
-    call: { request: { mobile: string } },
-    callback: ControllerCallback<CheckLoginUserResponse>
+    call: { request: LoginByMobileRequestDto },
+    callback: ControllerCallback<LoginResponseDto>
   ): Promise<void> {
     try {
-      
       const { mobile } = call.request;
-      const response = await this.loginService.checkLoginUser(mobile);
-      
-      const result: CheckLoginUserResponse = {
-        message: response.message,
-        name: response.data?.name || '',
-        token: response.data?.token || '',
-        refreshToken: response.data?.refreshToken || '',
-        _id: response.data?._id || '',
-        role: response.data?.role || '',
-        mobile: response.data?.mobile
-      };
-      
+      const result = await this._loginService.authenticateUserByMobile(mobile);      
       callback(null, result);
     } catch (error) {
       callback(handleControllerError(error, 'User authentication'));
@@ -43,22 +33,12 @@ export class LoginController implements ILoginController {
    * @param callback - Callback to return the authentication result or error
    */
   async checkGoogleLoginUser(
-    call: { request: { email: string } },
-    callback: ControllerCallback<CheckGoogleLoginUserResponse>
+    call: { request: LoginByGoogleRequestDto },
+    callback: ControllerCallback<LoginResponseDto>
   ): Promise<void> {
     try {
       const { email } = call.request;
-      const response = await this.loginService.checkGoogleUser(email);
-      
-      const result: CheckGoogleLoginUserResponse = {
-        message: response.message,
-        name: response.data?.name || '',
-        token: response.data?.token || '',
-        refreshToken: response.data?.refreshToken || '',
-        _id: response.data?._id || '',
-        role: response.data?.role || ''
-      };
-      
+      const result = await this._loginService.authenticateUserByGoogle(email);
       callback(null, result);
     } catch (error) {
       callback(handleControllerError(error, 'Google authentication'));

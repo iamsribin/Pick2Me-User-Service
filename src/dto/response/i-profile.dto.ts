@@ -1,16 +1,16 @@
  export interface IUserDto {
-  _id: string;
+  id: string;
   name: string;
   email: string;
   mobile: string;
-  userImage: string;
+  user_image: string;
   referral_code: string;
   account_status: string;
   balance: number;
   total_transactions: number;
   completed_rides: number;
   cancelled_rides: number;
-  joiningDate: string;
+  joining_date: string;
   reason: string;
 }
 

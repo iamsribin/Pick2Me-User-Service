@@ -1,40 +1,89 @@
+import { RegisterUserDataDto } from "../../dto/request/registration-request.dto";
 
+interface ValidationResult {
+  isValid: boolean;
+  errors: string[];
+}
 
-/**
- * Validates input data for controller methods
- */
-export const validateInput = (input: Partial<{
-  name: string;
-  email: string;
-  mobile: number;
-  password: string;
-  reffered_Code?: string;
-  otp: string;
-  token: string;
-  userImage?: string | null;
-}>): void => {
-  if (input.name !== undefined && (typeof input.name !== 'string' || input.name.trim() === '')) {
-    throw new Error('Invalid name');
+export class RegistrationValidation {
+  /**
+   * Validates mobile number format
+   * @param mobile - Mobile number to validate
+   * @returns boolean
+   */
+  static isValidMobile(mobile: string): boolean {
+    if (!mobile || typeof mobile !== 'string') return false;
+    
+    const cleanMobile = mobile.replace(/\s+/g, '');
+    const mobileRegex = /^[0-9]{10,15}$/;
+    
+    return mobileRegex.test(cleanMobile);
   }
-  if (input.email !== undefined && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.email)) {
-    throw new Error('Invalid email format');
+
+  /**
+   * Validates email format
+   * @param email - Email to validate
+   * @returns boolean
+   */
+  static isValidEmail(email: string): boolean {
+    if (!email || typeof email !== 'string') return false;
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email.trim());
   }
-  if (input.mobile !== undefined && input.mobile.toString().length !== 10) {
-    throw new Error('Invalid mobile number');
-  }  
-  if (input.password !== undefined && (typeof input.password !== 'string' || input.password.length < 6)) {
-    throw new Error('Password must be at least 6 characters');
+
+  /**
+   * Validates password strength
+   * @param password - Password to validate
+   * @returns boolean
+   */
+  static isValidPassword(password: string): boolean {
+    if (!password || typeof password !== 'string') return false;
+    
+    // At least 8 characters, 1 uppercase, 1 lowercase, 1 number
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/;
+    return passwordRegex.test(password);
   }
-  if (input.reffered_Code !== undefined && (typeof input.reffered_Code !== 'string' || input.reffered_Code.trim() === '')) {
-    throw new Error('Invalid referral code');
+
+  /**
+   * Validates name format
+   * @param name - Name to validate
+   * @returns boolean
+   */
+  static isValidName(name: string): boolean {
+    if (!name || typeof name !== 'string') return false;
+    
+    const trimmedName = name.trim();
+    return trimmedName.length >= 2 && trimmedName.length <= 50;
   }
-  if (input.otp !== undefined && (typeof input.otp !== 'string' || input.otp.trim() === '')) {
-    throw new Error('Invalid OTP');
+
+  /**
+   * Validates complete registration data
+   * @param userData - User data to validate
+   * @returns ValidationResult
+   */
+  static validateRegistrationData(userData: RegisterUserDataDto): ValidationResult {
+    const errors: string[] = [];
+
+    if (!this.isValidName(userData.name)) {
+      errors.push('Name must be between 2-50 characters');
+    }
+
+    if (!this.isValidEmail(userData.email)) {
+      errors.push('Please provide a valid email address');
+    }
+
+    if (!this.isValidMobile(userData.mobile)) {
+      errors.push('Please provide a valid mobile number');
+    }
+
+    if (!this.isValidPassword(userData.password)) {
+      errors.push('Password must be at least 8 characters with uppercase, lowercase, and number');
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors
+    };
   }
-  if (input.token !== undefined && (typeof input.token !== 'string' || input.token.trim() === '')) {
-    throw new Error('Invalid token');
-  }
-  if (input.userImage !== undefined && input.userImage !== null && typeof input.userImage !== 'string') {
-    throw new Error('Invalid user image');
-  }
-};
+}

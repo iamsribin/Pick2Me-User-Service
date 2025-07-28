@@ -7,10 +7,9 @@ import { UserProfileResponseDto } from "../../dto/transformer/user-profile.dto";
 import {
   IUpdateUserStatusGrpcResponse,
   UserListDTO,
-} from "../../dto/response/res-admin.dto";
+} from "../../dto/response/admin-response.dto";
 import {
   IUserDto,
-  IUserProfileGrpcResponse,
 } from "../../dto/response/i-profile.dto";
 
 export class AdminService implements IAdminService {
@@ -23,25 +22,24 @@ export class AdminService implements IAdminService {
       const transformedUsers: UserDto[] = plainToInstance(UserDto, users, {
         excludeExtraneousValues: true,
       });
+      
       return { Users: transformedUsers };
     } catch (error) {
       throw handleControllerError(error, "User data retrieval");
     }
   }
 
-  async getUserDetails(id: string): Promise<IUserProfileGrpcResponse> {
+  async getUserDetails(id: string): Promise<IUserDto> {
     try {
       const user = await this._adminRepo.getUserAllDetails(id);
       if (!user) throw new Error("User not found");
-
+      
       const transformed = plainToInstance(UserProfileResponseDto, user, {
         excludeExtraneousValues: true,
       });
+      
+      return transformed
 
-      return {
-        message: "User details retrieved successfully",
-        data: transformed as IUserDto,
-      };
     } catch (error) {
       throw handleControllerError(error, "User details retrieval");
     }

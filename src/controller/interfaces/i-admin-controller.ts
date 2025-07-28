@@ -1,5 +1,5 @@
-import { IUserProfileGrpcResponse } from "../../dto/response/i-profile.dto";
-import {IUpdateUserStatusGrpcResponse, UserListDTO } from "../../dto/response/res-admin.dto";
+import { IUserDto, IUserProfileGrpcResponse } from "../../dto/response/i-profile.dto";
+import {IUpdateUserStatusGrpcResponse, UserListDTO } from "../../dto/response/admin-response.dto";
 
 export type IAdminCallback<
   T = IUpdateUserStatusGrpcResponse | UserListDTO | IUserProfileGrpcResponse
@@ -18,7 +18,7 @@ export interface IAdminController {
 
   getUserDetails(
     call: { request: { id: string } },
-    callback: IAdminCallback<IUserProfileGrpcResponse>
+    callback: IAdminCallback<IUserDto>
   ): Promise<void>;
 
   updateUserStatus(
