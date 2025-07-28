@@ -1,4 +1,4 @@
-import { UserInterface } from '../../interface/user.interface'; 
+import { IUser } from '../../interface/user.interface';
 
 export interface RegistrationData {
   name: string;
@@ -10,13 +10,13 @@ export interface RegistrationData {
 }
 
 export interface IUserRepository {
-  saveUser(userData: RegistrationData): Promise<UserInterface>;
-  checkUser(mobile: string, email: string): Promise<UserInterface | null>;
-  findUser(mobile: string): Promise<UserInterface | null>;
-  findEmail(email: string): Promise<UserInterface | null>;
-  findUserWithStatus(status: 'Good' | 'Block'): Promise<UserInterface[]>;
-  findAndUpdate(id: string, status: 'Good' | 'Block'): Promise<UserInterface | null>;
-  findUserById(id: string): Promise<UserInterface | null>;
-  getUserDetails(id: string): Promise<UserInterface | null>;
-  updateUserStatus(id: string, status: 'Good' | 'Block', reason: string): Promise<UserInterface | null>;
+  saveUser(userData: RegistrationData): Promise<IUser>;
+  checkUser(mobile: string, email: string): Promise<IUser | null>;
+  findUser(mobile: string): Promise<IUser | null>;
+  findEmail(email: string): Promise<IUser | null>;
+  findUserWithStatus(status: 'Good' | 'Block'): Promise<IUser[]>;
+  findAndUpdate(id: string, status: 'Good' | 'Block'): Promise<IUser | null>;
+  findUserById(id: string): Promise<IUser | null>;
+  getUserDetails(id: string): Promise<IUser | null>;
+  updateUserStatus(id: string, status: 'Good' | 'Block', reason: string): Promise<IUser | null>;
 }

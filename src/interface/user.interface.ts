@@ -1,28 +1,19 @@
-import { Document, ObjectId } from "mongoose";
+import { IWalletTransaction } from './wallet-transaction.interface';
 
-export interface UserInterface extends Document {
-    _id: ObjectId;
-    name: string;
-    email: string;
-    mobile: number;
-    password: string;
-    userImage: string;
-    referral_code: string;
-    account_status: string;
-    joiningDate: Date;
-    isAdmin:boolean,
-    reasone: string,
-    wallet: {
-        balance: number;
-        transactions: {
-            date: Date;
-            details: string;
-            amount: number;
-            status: string;
-        }[];
-    };
-    RideDetails: {
-        completedRides: number;
-        cancelledRides: number;
-    };
+export interface IUser {
+  id: string;
+  name: string;
+  email: string;
+  mobile: string;
+  password: string;
+  user_image?: string;
+  referral_code?: string;
+  joining_date: Date;
+  account_status: 'Good' | 'Block';
+  reason?: string;
+  is_admin: boolean;
+  wallet_balance?: number;
+  cancel_ride_count?: number;
+  completed_ride_count?: number;
+  transactions?: IWalletTransaction[]; 
 }

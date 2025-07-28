@@ -2,10 +2,8 @@ import path from 'path';
 import * as grpc from '@grpc/grpc-js';
 import * as protoLoader from '@grpc/proto-loader';
 import "dotenv/config";
-// import { connectSQL } from './config/sql-database';
-import connectDB from "./config/mongo";
-// connectSQL(); 
-connectDB()
+import { connectSQL } from './config/sql-database';
+connectSQL(); 
 
 import registrationControl from './controller/implementation/registration_controller';
 import loginControl from './controller/implementation/login_controller';
