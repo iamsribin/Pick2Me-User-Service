@@ -6,6 +6,7 @@ import {
   IAdminController,
   IAdminCallback,
 } from "../interfaces/i-admin-controller";
+import { PaginatedUserListDTO, PaginationQuery } from "../../dto/response/pagination.dto";
 
 export class AdminController implements IAdminController {
   constructor(private readonly _adminService: IAdminService) {}
@@ -15,34 +16,63 @@ export class AdminController implements IAdminController {
    * @param call - Empty request object
    * @param callback - Callback to return the active users or error
    */
-  async getActiveUser(
-    call: { request: {} },
-    callback: IAdminCallback<UserListDTO>
-  ): Promise<void> {
-    try {
-      const { Users } = await this._adminService.getUserWithStatus("Good");
-      callback(null, { Users });
-    } catch (error) {
-      callback(handleControllerError(error, "Active user retrieval"));
-    }
+  async getUsersList(
+  call: { request: PaginationQuery },
+  callback: IAdminCallback<PaginatedUserListDTO>
+): Promise<void> {
+  try {
+    console.log("call.request",call.request);
+    
+    const { page = '1', limit = '6', search = '',status } = call.request;
+    
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.min(50, Math.max(1, parseInt(limit, 10) || 6)); // Max 50 items per page
+    
+    const result = await this._adminService.getUserWithStatusPaginated(
+      status,
+      pageNum,
+      limitNum,
+      search.trim()
+    );
+    console.log("result==",result);
+    
+   callback(null, {
+  Users: result.users,              
+  pagination: result.pagination      
+});
+  } catch (error) {
+    callback(handleControllerError(error, "Active user retrieval"));
   }
+}
 
-  /**
-   * Retrieves blocked users
-   * @param call - Empty request object
-   * @param callback - Callback to return the blocked users or error
-   */
-  async getBlockedUsers(
-    call: { request: {} },
-    callback: IAdminCallback<UserListDTO>
-  ): Promise<void> {
-    try {
-      const { Users } = await this._adminService.getUserWithStatus("Block");
-      callback(null, { Users });
-    } catch (error) {
-      callback(handleControllerError(error, "Blocked user retrieval"));
-    }
+/**
+ * Retrieves blocked users with pagination and search
+ * @param call - Request object with pagination and search parameters
+ * @param callback - Callback to return the paginated blocked users or error
+ */
+async getBlockedUsers(
+  call: { request: PaginationQuery },
+  callback: IAdminCallback<PaginatedUserListDTO>
+): Promise<void> {
+  try {
+    const { page = '1', limit = '6', search = '',status } = call.request;
+    
+    // Validate and parse pagination parameters
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.min(50, Math.max(1, parseInt(limit, 10) || 6)); // Max 50 items per page
+    
+    const result = await this._adminService.getUserWithStatusPaginated(
+      "Block",
+      pageNum,
+      limitNum,
+      search.trim()
+    );
+    
+    callback(null, result);
+  } catch (error) {
+    callback(handleControllerError(error, "Blocked user retrieval"));
   }
+}
 
   /**
    * Retrieves details for a specific user

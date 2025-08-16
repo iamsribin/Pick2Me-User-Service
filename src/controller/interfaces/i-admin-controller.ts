@@ -1,19 +1,20 @@
 import { IUserDto, IUserProfileGrpcResponse } from "../../dto/response/i-profile.dto";
 import {IUpdateUserStatusGrpcResponse, UserListDTO } from "../../dto/response/admin-response.dto";
+import { PaginatedUserListDTO, PaginationQuery } from "../../dto/response/pagination.dto";
 
 export type IAdminCallback<
   T = IUpdateUserStatusGrpcResponse | UserListDTO | IUserProfileGrpcResponse
 > = (error: Error | null, response?: T) => void;
 
 export interface IAdminController {
-  getActiveUser(
-    call: { request: {} },
-    callback: IAdminCallback<UserListDTO>
+  getUsersList(
+  call: { request: PaginationQuery },
+  callback: IAdminCallback<PaginatedUserListDTO>
   ): Promise<void>;
 
   getBlockedUsers(
-    call: { request: {} },
-    callback: IAdminCallback<UserListDTO>
+  call: { request: PaginationQuery },
+  callback: IAdminCallback<PaginatedUserListDTO>
   ): Promise<void>;
 
   getUserDetails(

@@ -1,4 +1,4 @@
-import { plainToInstance } from "class-transformer";
+import { instanceToPlain, plainToInstance } from "class-transformer";
 import { handleControllerError } from "../../utilities/handleError";
 import { IAdminService } from "../interfaces/i-admin-service";
 import { UserDto } from "../../dto/transformer/user.dto";
@@ -11,24 +11,78 @@ import {
 import {
   IUserDto,
 } from "../../dto/response/i-profile.dto";
-
+interface PaginatedUserListDTO {
+  users: UserDto[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
+}
 export class AdminService implements IAdminService {
   constructor(private readonly _adminRepo: AdminRepository) {}
 
-  async getUserWithStatus(status: "Good" | "Block"): Promise<UserListDTO> {
-    try {
-      const users = await this._adminRepo.findUsersByStatus(status);
 
-      const transformedUsers: UserDto[] = plainToInstance(UserDto, users, {
-        excludeExtraneousValues: true,
-      });
-      
-      return { Users: transformedUsers };
-    } catch (error) {
-      throw handleControllerError(error, "User data retrieval");
-    }
+async getUserWithStatusPaginated(
+  status: "Good" | "Block",
+  page: number = 1,
+  limit: number = 6,
+  search: string = ""
+): Promise<any> { 
+  try {
+    const validatedPage = Math.max(1, page);
+    const validatedLimit = Math.min(50, Math.max(1, limit));
+    const trimmedSearch = search.trim();
+
+    const { users, totalCount } = await this._adminRepo.findUsersByStatusWithPagination(
+      status,
+      validatedPage,
+      validatedLimit,
+      trimmedSearch
+    );
+
+    const transformedUsers: UserDto[] = plainToInstance(UserDto, users, {
+      excludeExtraneousValues: true,
+    });
+
+    const pagination = {
+      currentPage: validatedPage,
+      totalPages: Math.ceil(totalCount / validatedLimit),
+      totalItems: totalCount,
+      itemsPerPage: validatedLimit,
+      hasNextPage: validatedPage < Math.ceil(totalCount / validatedLimit),
+      hasPreviousPage: validatedPage > 1,
+    };
+
+    // ✅ Convert to plain object for clean JSON output
+    return instanceToPlain({
+      users: transformedUsers,
+      pagination,
+    });
+
+  } catch (error) {
+    throw handleControllerError(error, "Paginated user data retrieval");
   }
+}
 
+
+// Keep the original method for backward compatibility
+async getUserWithStatus(status: "Good" | "Block"): Promise<UserListDTO> {
+  try {
+    const users = await this._adminRepo.findUsersByStatus(status);
+
+    const transformedUsers: UserDto[] = plainToInstance(UserDto, users, {
+      excludeExtraneousValues: true,
+    });
+
+    return { Users: transformedUsers };
+  } catch (error) {
+    throw handleControllerError(error, "User data retrieval");
+  }
+}
   async getUserDetails(id: string): Promise<IUserDto> {
     try {
       const user = await this._adminRepo.getUserAllDetails(id);

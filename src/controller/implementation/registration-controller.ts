@@ -1,9 +1,8 @@
-import { RegistrationService } from '../../services/implementation/registration-service';
 import { handleControllerError } from "../../utilities/handleError";
 import { 
   SignupRequestDto, 
   CheckUserRequestDto, 
-  ResendOtpRequestDto 
+  ResendOtpRequestDto  
 } from '../../dto/request/registration-request.dto';
 import { 
   RegisterResponseDto, 
@@ -12,10 +11,11 @@ import {
 } from '../../dto/response/registration-response.dto';
 import { ControllerCallback } from '../interfaces/i-login-controller';
 import { IRegistrationController } from '../interfaces/i-register-controller';
+import { IRegistrationService } from '../../services/interfaces/i-registration-service';
 
 export class RegistrationController implements IRegistrationController {
   constructor(
-    private readonly _registrationService: RegistrationService
+    private readonly _registrationService: IRegistrationService
   ) {}
 
   /**

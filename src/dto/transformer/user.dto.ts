@@ -24,4 +24,48 @@ export class UserDto {
 
   @Expose()
   joining_date!: string;
+
+  @Expose()
+  wallet_balance?: number;
+
+  @Expose()
+  cancel_ride_count?: number;
+
+  @Expose()
+  completed_ride_count?: number;
+}
+
+// Pagination DTO
+export class PaginationTransformerDto {
+  @Expose()
+  currentPage!: number;
+
+  @Expose()
+  totalPages!: number;
+
+  @Expose()
+  totalItems!: number;
+
+  @Expose()
+  itemsPerPage!: number;
+
+  @Expose()
+  hasNextPage!: boolean;
+
+  @Expose()
+  hasPreviousPage!: boolean;
+}
+
+// Original DTO for backward compatibility
+export class UserListDTO {
+  Users!: UserDto[];
+}
+
+// New paginated response DTO
+export class PaginatedUserListDTO {
+  @Expose()
+  users!: UserDto[];
+
+  @Expose()
+  pagination!: PaginationTransformerDto;
 }

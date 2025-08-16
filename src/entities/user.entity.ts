@@ -54,7 +54,7 @@ export class User {
 
   @OneToMany(() => WalletTransaction, (transaction) => transaction.user, {
     cascade: true,
-    eager: false, // Don't load by default
+    eager: false, 
   })
   transactions!: WalletTransaction[];
 }
