@@ -1,4 +1,3 @@
-import { UserRepository } from '../../repositories/implementation/user-repo';
 import { AuthService } from '../../utilities/auth';
 import { ILoginService } from '../interfaces/i-login-service';
 import { handleControllerError } from '../../utilities/handleError';
@@ -6,10 +5,11 @@ import { ServiceResponse } from '../../dto/serviceResponse';
 import { LoginResponseDto } from '../../dto/response/login-response.dto';
 import { LoginTransformer } from '../../dto/transformer/login-transformer.dto';
 import { User } from '../../entities/user.entity';
+import { IUserRepository } from '../../repositories/interface/i-user-repository';
 
 export class LoginService implements ILoginService {
   constructor(
-    private readonly userRepo: UserRepository,
+    private readonly userRepo: IUserRepository,
     private readonly authService: AuthService
   ) {}
 
@@ -17,7 +17,7 @@ export class LoginService implements ILoginService {
    * Handles the common login logic for both mobile and Google authentication
    * @param user - User entity
    * @returns ServiceResponse with authentication data
-   */
+   */   
   private async processUserAuthentication(user: User): Promise<ServiceResponse> {
     // Check if user account is blocked
     if (user.account_status === 'Block') {
@@ -91,7 +91,7 @@ export class LoginService implements ILoginService {
 
       const user = await this.userRepo.findByMobile(mobile.trim());
       if(user?.account_status =="Block"){
-      return await this.validateAndProcessUser(user, 'Blocke');
+      return await this.validateAndProcessUser(user, 'Blocked');
       }
       return await this.validateAndProcessUser(user, 'Mobile authentication');
 

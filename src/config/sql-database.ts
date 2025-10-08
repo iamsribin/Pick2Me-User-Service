@@ -12,7 +12,7 @@ export const AppDataSource = new DataSource({
   username: process.env.SQL_USER,
   password: process.env.SQL_PASSWORD,
   database: process.env.SQL_DB,
-  synchronize: true, // use false in production
+  synchronize: true, // false in production
   logging: false,
   entities: [User,WalletTransaction],
 })

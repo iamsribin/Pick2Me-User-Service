@@ -21,7 +21,6 @@ export class AdminController implements IAdminController {
   callback: IAdminCallback<PaginatedUserListDTO>
 ): Promise<void> {
   try {
-    console.log("call.request",call.request);
     
     const { page = '1', limit = '6', search = '',status } = call.request;
     
@@ -34,7 +33,6 @@ export class AdminController implements IAdminController {
       limitNum,
       search.trim()
     );
-    console.log("result==",result);
     
    callback(null, {
   Users: result.users,              
@@ -57,7 +55,6 @@ async getBlockedUsers(
   try {
     const { page = '1', limit = '6', search = '',status } = call.request;
     
-    // Validate and parse pagination parameters
     const pageNum = Math.max(1, parseInt(page, 10) || 1);
     const limitNum = Math.min(50, Math.max(1, parseInt(limit, 10) || 6)); // Max 50 items per page
     

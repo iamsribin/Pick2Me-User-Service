@@ -1,9 +1,10 @@
 import { User } from '../../entities/user.entity';
 import { handleControllerError } from '../../utilities/handleError';
+import { IAdminRepository } from '../interface/i-admin-repository';
 import BaseRepository from './base-repo';
 import { Like, ILike } from 'typeorm'; // Import Like for case-sensitive and ILike for case-insensitive search
 
-export class AdminRepository extends BaseRepository<User> {
+export class AdminRepository extends BaseRepository<User> implements IAdminRepository  {
   constructor() {
     super(User);
   }

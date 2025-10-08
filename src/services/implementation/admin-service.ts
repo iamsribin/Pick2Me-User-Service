@@ -2,7 +2,6 @@ import { instanceToPlain, plainToInstance } from "class-transformer";
 import { handleControllerError } from "../../utilities/handleError";
 import { IAdminService } from "../interfaces/i-admin-service";
 import { UserDto } from "../../dto/transformer/user.dto";
-import { AdminRepository } from "../../repositories/implementation/admin-repo";
 import { UserProfileResponseDto } from "../../dto/transformer/user-profile.dto";
 import {
   IUpdateUserStatusGrpcResponse,
@@ -11,20 +10,10 @@ import {
 import {
   IUserDto,
 } from "../../dto/response/i-profile.dto";
-interface PaginatedUserListDTO {
-  users: UserDto[];
-  pagination: {
-    currentPage: number;
-    totalPages: number;
-    totalItems: number;
-    itemsPerPage: number;
-    hasNextPage: boolean;
-    hasPreviousPage: boolean;
-  };
-}
-export class AdminService implements IAdminService {
-  constructor(private readonly _adminRepo: AdminRepository) {}
+import { IAdminRepository } from "../../repositories/interface/i-admin-repository";
 
+export class AdminService implements IAdminService {
+  constructor(private readonly _adminRepo: IAdminRepository) {}
 
 async getUserWithStatusPaginated(
   status: "Good" | "Block",
@@ -57,7 +46,6 @@ async getUserWithStatusPaginated(
       hasPreviousPage: validatedPage > 1,
     };
 
-    // ✅ Convert to plain object for clean JSON output
     return instanceToPlain({
       users: transformedUsers,
       pagination,
@@ -69,7 +57,6 @@ async getUserWithStatusPaginated(
 }
 
 
-// Keep the original method for backward compatibility
 async getUserWithStatus(status: "Good" | "Block"): Promise<UserListDTO> {
   try {
     const users = await this._adminRepo.findUsersByStatus(status);

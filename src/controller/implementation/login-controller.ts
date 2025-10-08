@@ -20,7 +20,8 @@ export class LoginController implements ILoginController {
   ): Promise<void> {
     try {
       const { mobile } = call.request;
-      const result = await this._loginService.authenticateUserByMobile(mobile);      
+      const result = await this._loginService.authenticateUserByMobile(mobile);   
+         
       callback(null, result);
     } catch (error) {
       callback(handleControllerError(error, 'User authentication'));

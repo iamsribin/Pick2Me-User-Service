@@ -1,11 +1,12 @@
-import { DeepPartial, Repository } from 'typeorm';
-import { AppDataSource } from '../../config/sql-database';
-import { handleControllerError } from '../../utilities/handleError';
-import { ObjectLiteral } from 'typeorm';
-import { IBaseRepository } from '../interface/i-base-repo';
+import { DeepPartial, Repository } from "typeorm";
+import { AppDataSource } from "../../config/sql-database";
+import { handleControllerError } from "../../utilities/handleError";
+import { ObjectLiteral } from "typeorm";
+import { IBaseRepository } from "../interface/i-base-repo";
 
-
-export default class BaseRepository<T extends ObjectLiteral> implements IBaseRepository<T>{
+export default class BaseRepository<T extends ObjectLiteral>
+  implements IBaseRepository<T>
+{
   protected repo: Repository<T>;
 
   constructor(entity: { new (): T }) {
@@ -16,7 +17,7 @@ export default class BaseRepository<T extends ObjectLiteral> implements IBaseRep
     try {
       return await this.repo.findOne({ where });
     } catch (error) {
-      throw handleControllerError(error, 'Find one entity');
+      throw handleControllerError(error, "Find one entity");
     }
   }
 
@@ -24,7 +25,7 @@ export default class BaseRepository<T extends ObjectLiteral> implements IBaseRep
     try {
       return await this.repo.find({ where });
     } catch (error) {
-      throw handleControllerError(error, 'Find all entities');
+      throw handleControllerError(error, "Find all entities");
     }
   }
 
@@ -33,7 +34,7 @@ export default class BaseRepository<T extends ObjectLiteral> implements IBaseRep
       const entity = this.repo.create(data);
       return await this.repo.save(entity);
     } catch (error) {
-      throw handleControllerError(error, 'Create entity');
+      throw handleControllerError(error, "Create entity");
     }
   }
 
@@ -42,7 +43,7 @@ export default class BaseRepository<T extends ObjectLiteral> implements IBaseRep
       await this.repo.update(id, data);
       return await this.repo.findOne({ where: { id } as any });
     } catch (error) {
-      throw handleControllerError(error, 'Update entity');
+      throw handleControllerError(error, "Update entity");
     }
   }
 
@@ -50,7 +51,15 @@ export default class BaseRepository<T extends ObjectLiteral> implements IBaseRep
     try {
       await this.repo.delete(id);
     } catch (error) {
-      throw handleControllerError(error, 'Delete entity');
+      throw handleControllerError(error, "Delete entity");
     }
   }
+
+async findById(id: string): Promise<T | null> {
+  try {
+    return await this.repo.findOne({ where: { id } as any });
+  } catch (error) {
+    throw handleControllerError(error, "Find entity by id");
+  }
+}
 }

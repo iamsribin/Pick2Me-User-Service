@@ -21,6 +21,8 @@ import { AuthService } from "./utilities/auth";
 // === Import Repositories ===
 import { UserRepository } from "./repositories/implementation/user-repo";
 import { AdminRepository } from "./repositories/implementation/admin-repo";
+import UserController from "./controller/implementation/user-controller";
+import { UserService } from "./services/implementation/user-service";
 
 // === Initialize Repos, Services, Controllers ===
 const userRepo = new UserRepository();
@@ -30,10 +32,12 @@ const authService = new AuthService();
 const registrationService = new RegistrationService(userRepo, authService);
 const loginService = new LoginService(userRepo, authService);
 const adminService = new AdminService(adminRepo);
+const userService = new UserService(userRepo);
 
 const registrationController = new RegistrationController(registrationService);
 const loginController = new LoginController(loginService);
 const adminController = new AdminController(adminService);
+const userController = new UserController(userService);
 
 // === Load gRPC Proto ===
 const PROTO_PATH = path.resolve(__dirname, "./proto/user.proto");
@@ -64,6 +68,7 @@ server.addService(userProto.User.service, {
   ResendOtp: registrationController.resendOtp.bind(registrationController),
   CheckGoogleLoginUser: loginController.checkGoogleLoginUser.bind(loginController),
   CheckLoginUser: loginController.checkLoginUser.bind(loginController),
+  fetchUserProfile: userController.fetchUserProfile.bind(userController),
 
   AdminGetUsersList: adminController.getUsersList.bind(adminController),
   AdminGetBlockedUsers: adminController.getBlockedUsers.bind(adminController),

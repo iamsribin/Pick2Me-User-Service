@@ -1,8 +1,9 @@
 import { User } from '../../entities/user.entity';
 import { handleControllerError } from '../../utilities/handleError';
+import { IUserRepository } from '../interface/i-user-repository';
 import BaseRepository from './base-repo';
 
-export class UserRepository extends BaseRepository<User> {
+export class UserRepository extends BaseRepository<User> implements IUserRepository {
   constructor() {
     super(User);
   }

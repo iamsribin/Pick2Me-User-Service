@@ -1,4 +1,3 @@
-import { UserRepository } from '../../repositories/implementation/user-repo';
 import { AuthService } from '../../utilities/auth';
 import { IRegistrationService } from '../interfaces/i-registration-service';
 import bcrypt from '../../utilities/bcrypt';
@@ -15,6 +14,7 @@ import {
 import { REGISTRATION_CONSTANTS } from '../../constants/registration-constants';
 import { JwtPayload } from 'jsonwebtoken';
 import { RegisterUserDataDto } from '../../dto/request/registration-request.dto';
+import { IUserRepository } from '../../repositories/interface/i-user-repository';
 
 interface OtpPayload extends JwtPayload {
   clientId: string;
@@ -22,7 +22,7 @@ interface OtpPayload extends JwtPayload {
 
 export class RegistrationService implements IRegistrationService {
   constructor(
-    private readonly userRepo: UserRepository,
+    private readonly userRepo: IUserRepository,
     private readonly authService: AuthService
   ) {}
 
