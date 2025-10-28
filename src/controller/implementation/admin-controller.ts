@@ -1,7 +1,6 @@
-import { IUserDto, IUserProfileGrpcResponse } from "../../dto/response/i-profile.dto";
-import { IUpdateUserStatusGrpcResponse, UserListDTO } from "../../dto/response/admin-response.dto";
+import { IUserDto } from "../../dto/response/i-profile.dto";
+import { IUpdateUserStatusGrpcResponse } from "../../dto/response/admin-response.dto";
 import { IAdminService } from "../../services/interfaces/i-admin-service";
-import { handleControllerError } from "../../utilities/handleError";
 import {
   IAdminController,
   IAdminCallback,
@@ -43,7 +42,7 @@ export class AdminController implements IAdminController {
   pagination: result.pagination      
 });
   } catch (error) {
-    callback(handleControllerError(error, "Active user retrieval"));
+    callback(new Error( "Active user retrieval"));
   }
 }
 
@@ -71,7 +70,7 @@ async getBlockedUsers(
     
     callback(null, result);
   } catch (error) {
-    callback(handleControllerError(error, "Blocked user retrieval"));
+    callback(new Error( "Blocked user retrieval"));
   }
 }
 
@@ -91,7 +90,7 @@ async getUserDetails(
     
     callback(null, data);
   } catch (error) {
-    callback(handleControllerError(error, "User details retrieval"));
+    callback(new Error( "User details retrieval"));
   }
 }
 
@@ -113,7 +112,7 @@ async getUserDetails(
       );
       callback(null, response);
     } catch (error) {
-      callback(handleControllerError(error, "User status update"));
+      callback(new Error( "User status update"));
     }
   }
 }

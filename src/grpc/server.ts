@@ -1,37 +1,41 @@
 import * as grpc from "@grpc/grpc-js";
+import { userServiceDescriptor  } from "@retro-routes/shared";
+import { createUserHandlers } from "./handlers/user-handlers";
+import container from "../inversify/inversify.config";
+import { TYPES } from "../inversify/types";
 
-export async function startGrpcServer(options: {
-  serviceDescriptor: grpc.ServiceDefinition<grpc.UntypedServiceImplementation>;
-  handlers: grpc.UntypedServiceImplementation;
-  address: string;
-}) {
-  const { serviceDescriptor, handlers, address } = options;
+import { IRegistrationController } from "../controller/interfaces/i-register-controller";
+import { IAdminController } from "../controller/interfaces/i-admin-controller";
 
-  const server = new grpc.Server();
+const registrationController = container.get<IRegistrationController>(TYPES.RegistrationController);
+const adminController = container.get<IAdminController>(TYPES.AdminController);
 
-  // register service
-  server.addService(serviceDescriptor, handlers);
+if (!userServiceDescriptor) {
+  console.error("userServiceDescriptor is missing. Inspect loaded proto package.");
+  process.exit(1);
+}
 
-  // bind and start
-await new Promise<void>((resolve, reject) => {
-  server.bindAsync(address, grpc.ServerCredentials.createInsecure(), (err, port) => {
-    if (err) {
-      reject(err);
-      return;
-    }
-    console.log(`✅ gRPC server started on ${address} (bound port ${port})`);
-    resolve();
-  });
+const handlers = createUserHandlers({
+registrationController,
+adminController,
 });
 
-  // graceful shutdown helper
-  const shutdown = async () =>
-    new Promise<void>((resolve) =>
-      server.tryShutdown(() => {
-        console.log("🔴 gRPC server shut down");
-        resolve();
-      })
-    );
+export const startGrpcServer = () => {
+    try {
+        const server = new grpc.Server();
 
-  return { server, shutdown };
-}
+        // Regiser user service gRPC functions
+        server.addService(userServiceDescriptor, handlers);
+
+        // Bind server
+        server.bindAsync(
+            process.env.GRPC_URL as string, 
+            grpc.ServerCredentials.createInsecure(),
+            () => {
+                console.log(`GRPC server for user service running on port ${process.env.GRPC_URL}`);
+            }
+        );
+    } catch (err) {
+        console.log(err);
+    }
+};

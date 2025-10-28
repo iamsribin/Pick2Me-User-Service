@@ -1,10 +1,6 @@
-import { sendUnaryData, ServerUnaryCall } from "@grpc/grpc-js";
-import { IResponse } from "../../dto/request/user-response.dto";
-import { UserProfileDto } from "../../dto/response/user-response.dto";
+import { NextFunction, Request, Response } from "express";
+
 
 export interface IUserController {
-  fetchUserProfile(
-    call: ServerUnaryCall<{ id: string }, IResponse<UserProfileDto>>,
-    callback: sendUnaryData<IResponse<UserProfileDto>>
-  ): Promise<void>;
+fetchUserProfile(req: Request, res: Response, _next: NextFunction): Promise<void>
 }

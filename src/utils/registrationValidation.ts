@@ -1,4 +1,4 @@
-import { RegisterUserDataDto } from "../../dto/request/registration-request.dto";
+import { RegisterUserDataDto } from "../dto/request/registration-request.dto";
 
 interface ValidationResult {
   isValid: boolean;

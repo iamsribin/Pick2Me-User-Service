@@ -1,10 +1,8 @@
-import { AuthService } from '../../utilities/auth';
+import { AuthService } from '../../utils/auth';
 import { IRegistrationService } from '../interfaces/i-registration-service';
-import bcrypt from '../../utilities/bcrypt';
-import { generateReferralCode } from '../../utilities/refferalCodeGenarate';
-import { sendOtp } from '../../utilities/otpSending';
-import { handleControllerError } from '../../utilities/handleError';
-import { RegistrationValidation } from '../../utilities/validations/registrationValidation';
+import { generateReferralCode } from '../../utils/refferalCodeGenarate';
+import { sendOtp } from '../../utils/otpSending';
+import { RegistrationValidation } from '../../utils/registrationValidation';
 import { RegistrationTransformer } from '../../dto/transformer/registration-transformer.dto';
 import { 
   RegisterResponseDto, 
@@ -17,6 +15,11 @@ import { RegisterUserDataDto } from '../../dto/request/registration-request.dto'
 import { IUserRepository } from '../../repositories/interface/i-user-repository';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../../inversify/types';
+import { LoginTransformer } from '../../dto/transformer/login-transformer.dto';
+import { LoginResponseDto } from '../../dto/response/login-response.dto';
+import { User } from '../../entities/user.entity';
+import { ServiceResponse } from '../../dto/serviceResponse';
+import { bcryptService } from '@retro-routes/shared';
 
 interface OtpPayload extends JwtPayload {
   clientId: string;
@@ -25,9 +28,120 @@ interface OtpPayload extends JwtPayload {
 @injectable()
 export class RegistrationService implements IRegistrationService {
   constructor(
-   @inject(TYPES.UserRepository) private readonly userRepo: IUserRepository,
-   @inject(TYPES.AuthService)private readonly authService: AuthService
+   @inject(TYPES.UserRepository) private readonly _userRepo: IUserRepository,
+   @inject(TYPES.AuthService)private readonly _authService: AuthService
   ) {}
+
+  /**
+     * Handles the common login logic for both mobile and Google authentication
+     * @param user - User entity
+     * @returns ServiceResponse with authentication data
+     */   
+    private async processUserAuthentication(user: User): Promise<ServiceResponse> {
+      // Check if user account is blocked
+      if (user.account_status === 'Block') {
+        return { 
+          message: 'Blocked',
+          data: null 
+        };
+      }
+  
+      // Determine user role
+      const role = user.is_admin ? 'Admin' : 'User';
+  
+      // Generate tokens
+      const [token, refreshToken] = await Promise.all([
+        this._authService.createToken(user.id.toString(), '15m', role),
+        this._authService.createToken(user.id.toString(), '7d', role)
+      ]);
+  
+      // Validate token creation
+      if (!token || !refreshToken) {
+        throw new Error('Failed to generate authentication tokens');
+      }
+  
+      return {
+        message: 'Authentication successful',
+        data: {
+          name: user.name,
+          token,
+          _id: user.id.toString(),
+          refreshToken,
+          role,
+          mobile: user.mobile,
+          profile: user.user_image
+        },
+      };
+    }
+  
+    /**
+     * Validates user existence and processes authentication
+     * @param user - User entity or null
+     * @param errorContext - Context for error handling
+     * @returns LoginResponseDto
+     */
+    private async validateAndProcessUser(
+      user: User| null, 
+      errorContext: string
+    ): Promise<LoginResponseDto> {
+      if (!user) {
+        return LoginTransformer.transformToLoginResponse({
+          message: 'User not found. Please check your credentials.'
+        });
+      }
+  
+      const serviceResponse = await this.processUserAuthentication(user);
+      return LoginTransformer.transformToLoginResponse(serviceResponse);
+    }
+  
+    /**
+     * Authenticates user by mobile number
+     * @param mobile - User's mobile number
+     * @returns LoginResponseDto
+     */
+    async authenticateUserByMobile(mobile: string): Promise<LoginResponseDto> {
+      try {
+        // Validate mobile number format
+        if (!mobile || typeof mobile !== 'string' || mobile.trim().length === 0) {
+          return LoginTransformer.transformToLoginResponse({
+            message: 'Please provide a valid mobile number.'
+          });
+        }
+  
+        const user = await this._userRepo.findByMobile(mobile.trim());
+        if(user?.account_status =="Block"){
+        return await this.validateAndProcessUser(user, 'Blocked');
+        }
+        return await this.validateAndProcessUser(user, 'Mobile authentication');
+  
+      } catch (error) {
+        console.error('Mobile authentication error:', error);
+        throw new Error( 'Mobile authentication failed');
+      }
+    }
+  
+    /**
+     * Authenticates user by Google email
+     * @param email - User's Google email
+     * @returns LoginResponseDto
+     */
+    async authenticateUserByGoogle(email: string): Promise<LoginResponseDto> {
+      try {
+        // Validate email format
+        if (!email || typeof email !== 'string' || email.trim().length === 0) {
+          return LoginTransformer.transformToLoginResponse({
+            message: 'Please provide a valid email address.'
+          });
+        }
+  
+        const user = await this._userRepo.findByEmail(email.trim().toLowerCase());
+        return await this.validateAndProcessUser(user, 'Google authentication');
+  
+      } catch (error) {
+        console.error('Google authentication error:', error);
+        throw new Error( 'Google authentication failed');
+      }
+    }
 
   /**
    * Validates and sanitizes user registration data
@@ -53,7 +167,7 @@ export class RegistrationService implements IRegistrationService {
    */
   private async validateOtp(otp: string, token: string): Promise<boolean> {
     try {
-      const jwtOtp = this.authService.verifyOtpToken(token) as OtpPayload;
+      const jwtOtp = this._authService.verifyOtpToken(token) as OtpPayload;
       return otp === jwtOtp?.clientId;
     } catch (error) {
       console.error('OTP validation error:', error);
@@ -69,7 +183,7 @@ export class RegistrationService implements IRegistrationService {
   private async createNewUser(userData: RegisterUserDataDto): Promise<RegisterResponseDto> {
     try {
       const referral_code = generateReferralCode();
-      const hashedPassword = await bcrypt.securePassword(userData.password);
+      const hashedPassword = await bcryptService.securePassword(userData.password);
 
       const newUserData = {
         name: userData.name,
@@ -80,7 +194,7 @@ export class RegistrationService implements IRegistrationService {
         userImage: userData.userImage,
       };
 
-      const savedUser = await this.userRepo.create(newUserData);
+      const savedUser = await this._userRepo.create(newUserData);
 
       return RegistrationTransformer.transformToRegisterResponse({
         message: REGISTRATION_CONSTANTS.MESSAGES.REGISTRATION_SUCCESS,
@@ -116,7 +230,7 @@ export class RegistrationService implements IRegistrationService {
       const sanitizedData = this.sanitizeUserData(userData);
 
       // Check if user already exists
-      const existingUser = await this.userRepo.checkUserExists(
+      const existingUser = await this._userRepo.checkUserExists(
         sanitizedData.mobile, 
         sanitizedData.email
       );
@@ -131,7 +245,7 @@ export class RegistrationService implements IRegistrationService {
       return await this.createNewUser(sanitizedData);
     } catch (error) {
       console.error('Registration error:', error);
-      throw handleControllerError(error, 'User registration');
+      throw new Error( 'User registration');
     }
   }
 
@@ -153,7 +267,7 @@ export class RegistrationService implements IRegistrationService {
       }
 
       // Check if user exists
-      const existingUser = await this.userRepo.checkUserExists(
+      const existingUser = await this._userRepo.checkUserExists(
         mobile.trim(), 
         email.trim().toLowerCase()
       );
@@ -173,7 +287,7 @@ export class RegistrationService implements IRegistrationService {
       );
     } catch (error) {
       console.error('User validation error:', error);
-      throw handleControllerError(error, 'User existence validation');
+      throw new Error( 'User existence validation');
     }
   }
 
@@ -207,7 +321,7 @@ export class RegistrationService implements IRegistrationService {
       );
     } catch (error) {
       console.error('OTP generation error:', error);
-      throw handleControllerError(error, 'OTP generation');
+      throw new Error( 'OTP generation');
     }
   }
 
@@ -234,7 +348,7 @@ export class RegistrationService implements IRegistrationService {
       return await this.registerUser(userData);
     } catch (error) {
       console.error('OTP verification and registration error:', error);
-      throw handleControllerError(error, 'OTP verification and registration');
+      throw new Error( 'OTP verification and registration');
     }
   }
 }

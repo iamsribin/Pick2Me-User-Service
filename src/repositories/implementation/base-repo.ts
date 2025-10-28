@@ -1,6 +1,5 @@
 import { DeepPartial, Repository } from "typeorm";
 import { AppDataSource } from "../../config/sql-database";
-import { handleControllerError } from "../../utilities/handleError";
 import { ObjectLiteral } from "typeorm";
 import { IBaseRepository } from "../interface/i-base-repo";
 import { injectable } from "inversify";
@@ -19,7 +18,7 @@ export class BaseRepository<T extends ObjectLiteral>
     try {
       return await this.repo.findOne({ where });
     } catch (error) {
-      throw handleControllerError(error, "Find one entity");
+      throw new Error( "Find one entity");
     }
   }
 
@@ -27,7 +26,7 @@ export class BaseRepository<T extends ObjectLiteral>
     try {
       return await this.repo.find({ where });
     } catch (error) {
-      throw handleControllerError(error, "Find all entities");
+      throw new Error( "Find all entities");
     }
   }
 
@@ -36,7 +35,7 @@ export class BaseRepository<T extends ObjectLiteral>
       const entity = this.repo.create(data);
       return await this.repo.save(entity);
     } catch (error) {
-      throw handleControllerError(error, "Create entity");
+      throw new Error( "Create entity");
     }
   }
 
@@ -45,7 +44,7 @@ export class BaseRepository<T extends ObjectLiteral>
       await this.repo.update(id, data);
       return await this.repo.findOne({ where: { id } as any });
     } catch (error) {
-      throw handleControllerError(error, "Update entity");
+      throw new Error( "Update entity");
     }
   }
 
@@ -53,7 +52,7 @@ export class BaseRepository<T extends ObjectLiteral>
     try {
       await this.repo.delete(id);
     } catch (error) {
-      throw handleControllerError(error, "Delete entity");
+      throw new Error( "Delete entity");
     }
   }
 
@@ -61,7 +60,7 @@ async findById(id: string): Promise<T | null> {
   try {
     return await this.repo.findOne({ where: { id } as any });
   } catch (error) {
-    throw handleControllerError(error, "Find entity by id");
+    throw new Error( "Find entity by id");
   }
 }
 }

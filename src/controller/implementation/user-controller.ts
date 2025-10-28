@@ -1,35 +1,46 @@
-import { sendUnaryData, ServerUnaryCall } from "@grpc/grpc-js";
-import { IUserController } from "../interfaces/i-user-controller";
-import { IResponse } from "../../dto/request/user-response.dto";
-import { StatusCode } from "../../dto/common";
-import { IUserService } from "../../services/interfaces/i-user-service";
-import { UserProfileDto } from "../../dto/response/user-response.dto";
+import { Request, Response, NextFunction } from "express";
 import { inject, injectable } from "inversify";
+import { IUserService } from "../../services/interfaces/i-user-service";
 import { TYPES } from "../../inversify/types";
+import { uploadToS3Public } from "../../utils/s3";
 
 @injectable()
-export class UserController implements IUserController {
+export class UserController {
+  constructor(@inject(TYPES.UserService) private readonly userService: IUserService) {}
 
-  constructor(@inject(TYPES.UserService) private _userService: IUserService) {}
-
-  async fetchUserProfile(
-    call: ServerUnaryCall<{ id: string }, IResponse<UserProfileDto>>,
-    callback: sendUnaryData<IResponse<UserProfileDto>>
-  ): Promise<void> {
-    try {
-      
-      const { id } = call.request;
-      const response = await this._userService.fetchUserProfile(id);
-      console.log("response",response);
-      
-      callback(null, response);
-    } catch (error) {
-      console.log("error",error);
-      
-      callback(null, {
-        status: StatusCode.InternalServerError,
-        message: (error as Error).message,
-      });
+  /**
+   * POST /api/user/uploadChatFile
+   * multipart: file
+   */
+  uploadChatFile = async (req: Request, res: Response, _next: NextFunction) => {
+    
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
+    
+    if (!files || !files["file"] || !files["file"].length) {
+      return res.status(400).json({ message: "No file provided" });
     }
-  }
+
+    const file = files["file"][0];
+    const url = await uploadToS3Public(file); 
+    return res.status(202).json({ message: "success", fileUrl: url });
+  };
+
+  /**
+   * GET /api/user/get-my-profile
+   * Authenticated: req.user should be set by auth middleware
+   */
+  fetchUserProfile = async (req: Request, res: Response, _next: NextFunction) => {
+
+  res.setHeader("Cache-Control", "no-store, no-cache"); // Clear cache
+
+  const tokenPayload = JSON.parse(req.headers["x-user-payload"] as string); 
+
+    const id = tokenPayload.id; 
+    console.log("id==",id); 
+    
+    if (!id) return res.status(401).json({ message: "Unauthorized" });
+
+    const result = await this.userService.fetchUserProfile(id);
+    return res.status(200).json(result.data);
+  };
 }

@@ -1,6 +1,5 @@
 import { injectable } from 'inversify';
 import { User } from '../../entities/user.entity';
-import { handleControllerError } from '../../utilities/handleError';
 import { IAdminRepository } from '../interface/i-admin-repository';
 import {BaseRepository} from './base-repo';
 import { Like, ILike } from 'typeorm'; 
@@ -95,7 +94,7 @@ export class AdminRepository extends BaseRepository<User> implements IAdminRepos
         return { users, totalCount };
       }
     } catch (error) {
-      throw handleControllerError(error, 'Find users by status with pagination');
+      throw new Error( 'Find users by status with pagination');
     }
   }
 
@@ -125,7 +124,7 @@ export class AdminRepository extends BaseRepository<User> implements IAdminRepos
         },
       });
     } catch (error) {
-      throw handleControllerError(error, 'Find users by status');
+      throw new Error( 'Find users by status');
     }
   }
 
@@ -136,7 +135,7 @@ export class AdminRepository extends BaseRepository<User> implements IAdminRepos
         relations: ['transactions'],
       });
     } catch (error) {
-      throw handleControllerError(error, 'Get user with transactions');
+      throw new Error( 'Get user with transactions');
     }
   }
 
@@ -145,7 +144,7 @@ export class AdminRepository extends BaseRepository<User> implements IAdminRepos
       await this.repo.update(id, { account_status: status, reason });
       return await this.repo.findOne({ where: { id } });
     } catch (error) {
-      throw handleControllerError(error, 'Update user status');
+      throw new Error( 'Update user status');
     }
   }
 }
