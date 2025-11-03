@@ -11,17 +11,17 @@ export class LoginResponseDto {
   token!: string;
 
   @Expose()
-  refreshToken!: string;
-
-  @Expose()
   _id!: string;
 
   @Expose()
   role!: string;
 
   @Expose()
-  mobile?: string; 
+  refreshToken!: string;
 
-  @Expose()
-  profile?: string; 
+  // @Expose()
+  // mobile?: string; 
+
+  // @Expose()
+  // profile?: string; 
 }

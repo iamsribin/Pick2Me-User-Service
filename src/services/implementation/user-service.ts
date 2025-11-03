@@ -9,7 +9,8 @@ import { TYPES } from "../../inversify/types";
 @injectable()
 export class UserService implements IUserService {
   constructor(
- @inject(TYPES.UserRepository) private _userRepo: IUserRepository) {}
+    @inject(TYPES.UserRepository) private _userRepo: IUserRepository
+  ) {}
 
   async fetchUserProfile(id: string): Promise<IResponse<UserProfileDto>> {
     try {
@@ -34,16 +35,15 @@ export class UserService implements IUserService {
         accountStatus: user.account_status,
         wallet: {
           balance: user.wallet_balance,
-          transactions:
-            user.transactions?.length || 0, 
+          transactions: user.transactions?.length || 0,
         },
         rideDetails: {
-          completedRides: Number(user.completed_ride_count), 
-          cancelledRides: Number(user.cancel_ride_count), 
+          completedRides: Number(user.completed_ride_count),
+          cancelledRides: Number(user.cancel_ride_count),
         },
       };
 
-      return { 
+      return {
         message: "success",
         status: StatusCode.OK,
         data,

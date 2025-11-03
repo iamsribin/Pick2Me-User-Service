@@ -9,4 +9,6 @@ export interface IRegistrationService {
   verifyOtpAndRegister(userData: RegisterUserDataDto, otp: string, token: string): Promise<RegisterResponseDto>;
   authenticateUserByMobile(mobile: string): Promise<LoginResponseDto>;
   authenticateUserByGoogle(email: string): Promise<LoginResponseDto>;
+  refreshToken(token:string):Promise<{accessToken:string}>
+
 }

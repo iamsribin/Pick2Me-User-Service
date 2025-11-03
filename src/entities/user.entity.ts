@@ -22,8 +22,8 @@ export class User {
   @Column({ unique: true, type: "bigint" })
   mobile!: string;
 
-  @Column()
-  password!: string;
+  // @Column()
+  // password!: string;
 
   @Column({ nullable: true })
   user_image!: string;
@@ -40,8 +40,8 @@ export class User {
   @Column({ nullable: true })
   reason!: string;
 
-  @Column({ default: false })
-  is_admin!: boolean;
+  @Column({ type: "enum", enum: ["Admin", "User"], default: "User" })
+  role!: "Admin" | "User";
 
   @Column({ type: "bigint", default: 0 })
   cancel_ride_count!: number;

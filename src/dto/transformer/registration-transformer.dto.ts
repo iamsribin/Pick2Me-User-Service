@@ -22,10 +22,9 @@ export class RegistrationTransformer {
     });
   }
 
-  static transformToResendOtpResponse(message: string, token: string): ResendOtpResponseDto {
+  static transformToResendOtpResponse(message: string): ResendOtpResponseDto {
     return plainToClass(ResendOtpResponseDto, {
       message,
-      token
     });
   }
 }

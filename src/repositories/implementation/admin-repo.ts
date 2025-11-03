@@ -1,12 +1,14 @@
 import { injectable } from 'inversify';
 import { User } from '../../entities/user.entity';
 import { IAdminRepository } from '../interface/i-admin-repository';
-import {BaseRepository} from './base-repo';
 import { Like, ILike } from 'typeorm'; 
+import { SqlBaseRepository } from '@retro-routes/shared';
+import { AppDataSource } from '../../config/sql-database';
+
 @injectable()
-export class AdminRepository extends BaseRepository<User> implements IAdminRepository  {
+export class AdminRepository extends SqlBaseRepository<User> implements IAdminRepository  {
   constructor() {
-    super(User);
+    super(User, AppDataSource);
   }
 
   // New method with pagination and search
@@ -104,7 +106,7 @@ export class AdminRepository extends BaseRepository<User> implements IAdminRepos
       return await this.repo.find({
         where: {
           account_status: status,
-          is_admin: false,
+          role: "Admin",
         },
         select: [
           'id',

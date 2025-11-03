@@ -5,13 +5,13 @@ export interface IUser {
   name: string;
   email: string;
   mobile: string;
-  password: string;
+  // password: string;
   user_image?: string;
   referral_code?: string;
   joining_date: Date;
   account_status: 'Good' | 'Block';
   reason?: string;
-  is_admin: boolean;
+  role: "Admin" | "User";
   wallet_balance?: number;
   cancel_ride_count?: number;
   completed_ride_count?: number;

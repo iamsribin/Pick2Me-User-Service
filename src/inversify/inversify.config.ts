@@ -18,7 +18,6 @@ import { RegistrationController } from "../controller/implementation/registratio
 import { AdminController } from "../controller/implementation/admin-controller";
 
 
-import { AuthService } from "../utils/auth";
 
 import { IUserRepository } from "../repositories/interface/i-user-repository";
 import { IAdminRepository } from "../repositories/interface/i-admin-repository";
@@ -29,11 +28,6 @@ export const container = new Container();
 // Repositories - singletons
 container.bind<IUserRepository>(TYPES.UserRepository).to(UserRepository).inSingletonScope();
 container.bind<IAdminRepository>(TYPES.AdminRepository).to(AdminRepository).inSingletonScope();
-
-
-// Utilities
-container.bind(TYPES.AuthService).to(AuthService).inSingletonScope();
-
 
 // Services - singletons are fine for stateless services
 container.bind(TYPES.UserService).to(UserService).inSingletonScope();

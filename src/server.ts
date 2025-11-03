@@ -5,6 +5,7 @@ import app from "./app";
 import { startGrpcServer } from "./grpc/server";
 import { connectSQL } from "./config/sql-database";
 import { isEnvDefined } from "./utils/envChecker";
+import { createRedisService, RedisService } from "@retro-routes/shared";
 
 // server
 const startServer = async () => {
@@ -16,7 +17,10 @@ const startServer = async () => {
         connectSQL();
 
         // start grpc server
-        startGrpcServer()
+        startGrpcServer() 
+
+        // get redis service instance
+        createRedisService(process.env.REDIS_URL!);
 
         //listen to port
         app.listen(process.env.PORT, () =>

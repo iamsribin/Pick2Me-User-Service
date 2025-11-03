@@ -1,7 +1,9 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction, response } from "express";
 import { inject, injectable } from "inversify";
 import { IRegistrationService } from "../../services/interfaces/i-registration-service";
 import { TYPES } from "../../inversify/types";
+import { ConflictError, ForbiddenError, StatusCode } from "@retro-routes/shared";
+import { uploadToS3Public } from "../../utils/s3";
 
 @injectable()
 export class RegistrationController {
@@ -13,8 +15,8 @@ export class RegistrationController {
    * Expects multipart/form-data (userImage optional) and OTP present in body.
    */
   register = async (req: Request, res: Response, _next: NextFunction) => {
-    // TODO: validate req.body with zod/joi
-    const {
+    try {
+          const {
       name,
       email,
       mobile,
@@ -23,17 +25,26 @@ export class RegistrationController {
       otp, 
     } = req.body;
 
-    const userImage = (req.file as Express.Multer.File | undefined)?.path ?? "";
+      const file = req.file as Express.Multer.File | undefined;
+      
+      let user_image = "https://retro-routes-store.s3.eu-north-1.amazonaws.com/1762197847863-Gemini_Generated_Image_dmzlyqdmzlyqdmzl.png"
+      
+      console.log("file",file);
 
-    // token used to validate OTP (set earlier in checkUser)
-    const token = req.cookies?.otp;
+        if (file) {
+            user_image = await uploadToS3Public(file);
+            }
+          console.log("userImage",user_image);
 
-    const payload = { name, email, mobile, password, reffered_Code, userImage };
 
-    const result = await this._registrationService.verifyOtpAndRegister(payload, otp, token);
+    const payload = { name, email, mobile, password, reffered_Code, user_image };
 
-    // choose status code based on result (service should return appropriate shape)
+    const result = await this._registrationService.verifyOtpAndRegister(payload, otp, email);
+
     res.status(201).json(result);
+    } catch (error) {
+      _next(error)
+    }
   };
 
   /**
@@ -41,51 +52,44 @@ export class RegistrationController {
    * Checks if user exists and issues OTP when missing. Returns { token, message, userExists? }
    */
   checkUser = async (req: Request, res: Response, _next: NextFunction) => {
+    try{
     const { mobile, email, name } = req.body;
-    // validate inputs...
 
     const userCheckResult = await this._registrationService.validateUserExistence(mobile, email);
+    
+    if(userCheckResult.userExists) throw ConflictError("you already created a account please login!")
+     
+      const response = await this._registrationService.generateAndSendOtp(email, name);
 
-    if (!userCheckResult.userExists) {
-      const otpResult = await this._registrationService.generateAndSendOtp(email, name);
+      return res.status(StatusCode.Created).json(response);
 
-      // Set OTP cookie for short-lived verification
-      const cookieOptions = {
-        httpOnly: true,
-        expires: new Date(Date.now() + 180_000),
-        sameSite: process.env.NODE_ENV === "production" ? "none" as const : "lax" as const,
-        secure: process.env.NODE_ENV === "production",
-      };
-
-      res.cookie("otp", otpResult.token, cookieOptions);
-
-      return res.status(201).json({
-        message: userCheckResult.message,
-        token: otpResult.token,
-        userExists: false,
-      });
+     }catch(error){
+      _next(error)
     }
-
-    return res.status(200).json(userCheckResult);
   };
 
   /**
    * POST /api/user/resendOtp
    */
   resendOtp = async (req: Request, res: Response, _next: NextFunction) => {
-    const { email, name } = req.body;
-
-    const result = await this._registrationService.generateAndSendOtp(email, name);
-
-    const cookieOptions = {
-      httpOnly: true,
-      expires: new Date(Date.now() + 180_000),
-      sameSite: process.env.NODE_ENV === "production" ? "none" as const : "lax" as const,
-      secure: process.env.NODE_ENV === "production",
-    };
-
-    res.cookie("otp", result.token, cookieOptions);
-    res.status(201).json(result);
+    try {
+      const { email, name } = req.body;
+  
+      const result = await this._registrationService.generateAndSendOtp(email, name);
+  
+      // const cookieOptions = {
+      //   httpOnly: true,
+      //   expires: new Date(Date.now() + 180_000),
+      //   sameSite: process.env.NODE_ENV === "production" ? "none" as const : "lax" as const,
+      //   secure: process.env.NODE_ENV === "production",
+      // };
+  
+      // res.cookie("otp", result.token, cookieOptions);
+      res.status(201).json(result);
+      
+    } catch (error) {
+      _next(error);
+    }
   };
 
 
@@ -94,27 +98,67 @@ export class RegistrationController {
    * Body: { mobile }
    */
   checkLoginUser = async (req: Request, res: Response, _next: NextFunction) => {
-    const { mobile } = req.body;
-    const result = await this._registrationService.authenticateUserByMobile(mobile);
-     console.log("result",result);
-     
-            res.cookie("refreshToken", result.refreshToken, {
-                httpOnly: true,
-                sameSite: "lax",
-                secure: false,
-                maxAge: 1000 * 60 * 60 * 24,
-            });
-
-    res.status(200).json(result);
+    try {
+      
+      const { mobile } = req.body;
+      const result = await this._registrationService.authenticateUserByMobile(mobile);
+       
+            const { refreshToken, ...responseWithoutToken } = result;
+  
+              res.cookie("refreshToken", refreshToken, {
+                  httpOnly: true,
+                  secure: process.env.NODE_ENV === 'production',
+                  sameSite: 'strict',
+                  maxAge: 7 * 24 * 60 * 60 * 1000,
+              });
+  
+      res.status(200).json(responseWithoutToken);
+    } catch (error) {
+      _next(error)
+    }
   };
+    async refreshToken(
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> {
+        try {
+            const refreshToken = req.cookies.refreshToken;
 
+            // if (!req.cookies) throw ForbiddenError("token missing")
+
+            const accessToken  = await this._registrationService.refreshToken(refreshToken);
+            res.status(200).json({accessToken });
+            
+        } catch (err: unknown) {
+            next(err);
+        }
+   
+ }
   /**
    * POST /api/user/checkGoogleLoginUser
    * Body: { email }
    */
   checkGoogleLoginUser = async (req: Request, res: Response, _next: NextFunction) => {
-    const { email } = req.body;
-    const result = await this._registrationService.authenticateUserByGoogle(email);
-    res.status(200).json(result);
+    try {
+      const { email } = req.body;
+      const result = await this._registrationService.authenticateUserByGoogle(email);
+      res.status(200).json(result);
+    } catch (error) {
+      _next(error)
+    }
   };
+
+    logout = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {     
+          console.log("logout");
+               
+             res.clearCookie("refreshToken");
+            res.status(StatusCode.OK).json({ message: "successfully logged out" })
+        } catch (err) {
+          console.log("err",err);
+          
+            next(err)
+        }
+    }
 }

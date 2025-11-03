@@ -1,7 +1,7 @@
+import { ISqlBaseRepository } from '@retro-routes/shared';
 import { User } from '../../entities/user.entity';
-import { IBaseRepository } from './i-base-repo';
 
-export interface IUserRepository extends IBaseRepository<User> {
+export interface IUserRepository extends ISqlBaseRepository<User> {
   /**
    * Find a user by mobile number.
    * @param mobile - User's mobile number
