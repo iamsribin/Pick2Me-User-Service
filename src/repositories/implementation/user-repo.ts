@@ -1,13 +1,13 @@
 import { injectable } from 'inversify';
 import { User } from '../../entities/user.entity';
-import { handleControllerError } from '../../utilities/handleError';
 import { IUserRepository } from '../interface/i-user-repository';
-import { BaseRepository } from './base-repo';
+import { SqlBaseRepository } from '@retro-routes/shared';
+import { AppDataSource } from '../../config/sql-database';
 
 @injectable()
-export class UserRepository extends BaseRepository<User> implements IUserRepository {
+export class UserRepository extends SqlBaseRepository<User> implements IUserRepository {
   constructor() {
-    super(User);
+    super(User, AppDataSource);
   }
 
   async findByMobile(mobile: string): Promise<User | null> {
@@ -24,7 +24,7 @@ export class UserRepository extends BaseRepository<User> implements IUserReposit
         where: [{ mobile }, { email }],
       });
     } catch (error) {
-      throw handleControllerError(error, 'Check user by mobile/email');
+      throw new Error('Check user by mobile/email');
     }
   }
 
@@ -35,7 +35,7 @@ export class UserRepository extends BaseRepository<User> implements IUserReposit
         relations: ['transactions'],
       });
     } catch (error) {
-      throw handleControllerError(error, 'Get user with transactions');
+      throw new Error( 'Get user with transactions');
     }
   }
 }

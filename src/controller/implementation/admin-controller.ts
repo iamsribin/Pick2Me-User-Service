@@ -1,119 +1,114 @@
-import { IUserDto, IUserProfileGrpcResponse } from "../../dto/response/i-profile.dto";
-import { IUpdateUserStatusGrpcResponse, UserListDTO } from "../../dto/response/admin-response.dto";
-import { IAdminService } from "../../services/interfaces/i-admin-service";
-import { handleControllerError } from "../../utilities/handleError";
-import {
-  IAdminController,
-  IAdminCallback,
-} from "../interfaces/i-admin-controller";
-import { PaginatedUserListDTO, PaginationQuery } from "../../dto/response/pagination.dto";
-import { TYPES } from "../../inversify/types";
+import { Request, Response, NextFunction } from "express";
 import { inject, injectable } from "inversify";
+import { IAdminService } from "../../services/interfaces/i-admin-service";
+import { TYPES } from "../../inversify/types";
 
 @injectable()
-export class AdminController implements IAdminController {
-  
-  constructor(@inject(TYPES.AdminService) private _adminService: IAdminService) {}
+export class AdminController {
+  constructor(@inject(TYPES.AdminService) private readonly _adminService: IAdminService) {}
 
   /**
-   * Retrieves active users
-   * @param call - Empty request object
-   * @param callback - Callback to return the active users or error
+   * GET /getActiveUserData
+   * Query: page, limit, search, status
+   * Response: { users: [], pagination: { page, limit, total, totalPages } }
    */
-  async getUsersList(
-  call: { request: PaginationQuery },
-  callback: IAdminCallback<PaginatedUserListDTO>
-): Promise<void> {
-  try {
-    
-    const { page = '1', limit = '6', search = '',status } = call.request;
-    
-    const pageNum = Math.max(1, parseInt(page, 10) || 1);
-    const limitNum = Math.min(50, Math.max(1, parseInt(limit, 10) || 6)); // Max 50 items per page
-    
-    const result = await this._adminService.getUserWithStatusPaginated(
-      status,
-      pageNum,
-      limitNum,
-      search.trim()
-    );
-    
-   callback(null, {
-  Users: result.users,              
-  pagination: result.pagination      
-});
-  } catch (error) {
-    callback(handleControllerError(error, "Active user retrieval"));
-  }
-}
-
-/**
- * Retrieves blocked users with pagination and search
- * @param call - Request object with pagination and search parameters
- * @param callback - Callback to return the paginated blocked users or error
- */
-async getBlockedUsers(
-  call: { request: PaginationQuery },
-  callback: IAdminCallback<PaginatedUserListDTO>
-): Promise<void> {
-  try {
-    const { page = '1', limit = '6', search = '',status } = call.request;
-    
-    const pageNum = Math.max(1, parseInt(page, 10) || 1);
-    const limitNum = Math.min(50, Math.max(1, parseInt(limit, 10) || 6)); // Max 50 items per page
-    
-    const result = await this._adminService.getUserWithStatusPaginated(
-      "Block",
-      pageNum,
-      limitNum,
-      search.trim()
-    );
-    
-    callback(null, result);
-  } catch (error) {
-    callback(handleControllerError(error, "Blocked user retrieval"));
-  }
-}
-
-  /**
-   * Retrieves details for a specific user
-   * @param call - Request object containing the user ID
-   * @param callback - Callback to return the user details or error
-   */
-async getUserDetails(
-  call: { request: { id: string } },
-  callback:  IAdminCallback<IUserDto>
-): Promise<void> {
-  try {
-    const { id } = call.request;
-    const data = await this._adminService.getUserDetails(id);
-    console.log("datadata",data);
-    
-    callback(null, data);
-  } catch (error) {
-    callback(handleControllerError(error, "User details retrieval"));
-  }
-}
-
-  /**
-   * Updates the status of a user
-   * @param call - Request object containing the user ID, status, and reason
-   * @param callback - Callback to return the update result or error
-   */
-  async updateUserStatus(
-    call: { request: { id: string; status: "Good" | "Block"; reason: string } },
-    callback: IAdminCallback<IUpdateUserStatusGrpcResponse>
-  ): Promise<void> {
+  getUsersList = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { id, status, reason } = call.request;
-      const response = await this._adminService.updateUserStatus(
-        id,
-        status,
-        reason
+      const { page = "1", limit = "6", search = "", status } = req.query;
+
+      const pageNum = Math.max(1, parseInt(String(page), 10) || 1);
+      const limitNum = Math.min(50, Math.max(1, parseInt(String(limit), 10) || 6));
+
+      const result = await this._adminService.getUserWithStatusPaginated(
+        status as "Good" | "Block",
+        pageNum,
+        limitNum,
+        String(search).trim()
       );
-      callback(null, response);
-    } catch (error) {
-      callback(handleControllerError(error, "User status update"));
+
+      const users = result.users || [];
+      const pagination = result.pagination || {};
+
+      res.status(200).json({ users, pagination });
+    } catch (err) {
+      next(err);
     }
-  }
+  };
+
+  /**
+   * GET /blockedUserData
+   * Returns users with "Block" status (paginated, search supported)
+   */
+  getBlockedUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { page = "1", limit = "6", search = "" } = req.query;
+
+      const pageNum = Math.max(1, parseInt(String(page), 10) || 1);
+      const limitNum = Math.min(50, Math.max(1, parseInt(String(limit), 10) || 6));
+
+      const result = await this._adminService.getUserWithStatusPaginated(
+        "Block",
+        pageNum,
+        limitNum,
+        String(search).trim()
+      );
+
+      const users = result.users || [];
+      const pagination = result.pagination || {};
+
+      res.status(200).json({ users, pagination });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  /**
+   * GET /userData
+   * Query: id
+   * Response: { user: {...} } or 404
+   */
+  getUserData = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const id = String(req.query.id || "");
+
+      if (!id) {
+         res.status(400).json({ message: "Missing user id" });
+         return
+      }
+
+      const data = await this._adminService.getUserDetails(id);
+
+      if (!data) {
+         res.status(404).json({ message: "User not found" });
+         return
+      }
+
+      res.status(200).json({ user: data });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  /**
+   * PATCH /updateUserStatus
+   * Query: id
+   * Body: { status: "Good" | "Block", reason?: string }
+   */
+  updateUserStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const id = String(req.query.id || "");
+      const { status, reason } = req.body;
+
+      if (!id) res.status(400).json({ message: "Missing user id" });
+      if (!status || (status !== "Good" && status !== "Block")) {
+         res.status(400).json({ message: "Invalid status. Allowed: Good | Block" });
+      }
+
+      const response = await this._adminService.updateUserStatus(id, status, reason);
+
+      res.status(200).json({ message: "Success", userId: id, result: response });
+    } catch (err) {
+      next(err);
+    }
+  };
 }

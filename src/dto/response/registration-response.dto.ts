@@ -2,7 +2,13 @@ import { Expose } from "class-transformer";
 
 export class RegisterResponseDto {
   @Expose()
-  message!: string;
+  name!: string;
+    
+  @Expose()
+  role!: string;  
+  
+  @Expose()
+  id!: string; 
 
   @Expose()
   data?: {
@@ -29,7 +35,4 @@ export class CheckUserResponseDto {
 export class ResendOtpResponseDto {
   @Expose()
   message!: string;
-
-  @Expose()
-  token!: string;
 }

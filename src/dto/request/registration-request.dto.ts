@@ -23,8 +23,8 @@ export interface RegisterUserDataDto {
   name: string;
   email: string;
   mobile: string;
-  password: string;
+  // password: string;
   reffered_Code?: string;
-  userImage?: string | null;
+  user_image?: string ;
 }
 

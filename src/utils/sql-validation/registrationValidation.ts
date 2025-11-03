@@ -77,9 +77,9 @@ export class RegistrationValidation {
       errors.push('Please provide a valid mobile number');
     }
 
-    if (!this.isValidPassword(userData.password)) {
-      errors.push('Password must be at least 8 characters with uppercase, lowercase, and number');
-    }
+    // if (!this.isValidPassword(userData.password)) {
+    //   errors.push('Password must be at least 8 characters with uppercase, lowercase, and number');
+    // }
 
     return {
       isValid: errors.length === 0,

@@ -1,5 +1,4 @@
 import { instanceToPlain, plainToInstance } from "class-transformer";
-import { handleControllerError } from "../../utilities/handleError";
 import { IAdminService } from "../interfaces/i-admin-service";
 import { UserDto } from "../../dto/transformer/user.dto";
 import { UserProfileResponseDto } from "../../dto/transformer/user-profile.dto";
@@ -55,7 +54,7 @@ async getUserWithStatusPaginated(
     });
 
   } catch (error) {
-    throw handleControllerError(error, "Paginated user data retrieval");
+    throw new Error( "Paginated user data retrieval");
   }
 }
 
@@ -70,7 +69,7 @@ async getUserWithStatus(status: "Good" | "Block"): Promise<UserListDTO> {
 
     return { Users: transformedUsers };
   } catch (error) {
-    throw handleControllerError(error, "User data retrieval");
+    throw new Error( "User data retrieval");
   }
 }
   async getUserDetails(id: string): Promise<IUserDto> {
@@ -85,7 +84,7 @@ async getUserWithStatus(status: "Good" | "Block"): Promise<UserListDTO> {
       return transformed
 
     } catch (error) {
-      throw handleControllerError(error, "User details retrieval");
+      throw new Error( "User details retrieval");
     }
   }
 
@@ -103,7 +102,7 @@ async getUserWithStatus(status: "Good" | "Block"): Promise<UserListDTO> {
 
       return { message: "User status updated successfully", user_id: user.id };
     } catch (error) {
-      throw handleControllerError(error, "User status update");
+      throw new Error( "User status update");
     }
   }
 }

@@ -1,10 +1,7 @@
-import { AuthService } from '../../utilities/auth';
 import { IRegistrationService } from '../interfaces/i-registration-service';
-import bcrypt from '../../utilities/bcrypt';
-import { generateReferralCode } from '../../utilities/refferalCodeGenarate';
-import { sendOtp } from '../../utilities/otpSending';
-import { handleControllerError } from '../../utilities/handleError';
-import { RegistrationValidation } from '../../utilities/validations/registrationValidation';
+import { generateReferralCode } from '../../utils/refferalCodeGenarate';
+import { sendOtp } from '../../utils/otpSending';
+import { RegistrationValidation } from '../../utils/sql-validation/registrationValidation';
 import { RegistrationTransformer } from '../../dto/transformer/registration-transformer.dto';
 import { 
   RegisterResponseDto, 
@@ -17,6 +14,11 @@ import { RegisterUserDataDto } from '../../dto/request/registration-request.dto'
 import { IUserRepository } from '../../repositories/interface/i-user-repository';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../../inversify/types';
+import { LoginTransformer } from '../../dto/transformer/login-transformer.dto';
+import { LoginResponseDto } from '../../dto/response/login-response.dto';
+import { AccessPayload, BadRequestError, bcryptService, ConflictError, ForbiddenError, generateJwtToken, getRedisService, HttpError, InternalError, NotFoundError, UnauthorizedError, verifyToken } from '@retro-routes/shared';
+import { sanitizeService } from '../../utils/sql-validation/sanitization';
+import generateOTP from '../../utils/generateOtp';
 
 interface OtpPayload extends JwtPayload {
   clientId: string;
@@ -25,62 +27,184 @@ interface OtpPayload extends JwtPayload {
 @injectable()
 export class RegistrationService implements IRegistrationService {
   constructor(
-   @inject(TYPES.UserRepository) private readonly userRepo: IUserRepository,
-   @inject(TYPES.AuthService)private readonly authService: AuthService
+   @inject(TYPES.UserRepository) private readonly _userRepo: IUserRepository,
   ) {}
 
-  /**
-   * Validates and sanitizes user registration data
-   * @param userData - User registration data
-   * @returns Sanitized user data
-   */
-  private sanitizeUserData(userData: RegisterUserDataDto): RegisterUserDataDto {
-    return {
-      name: userData.name?.trim(),
-      email: userData.email?.trim().toLowerCase(),
-      mobile: userData.mobile?.trim(),
-      password: userData.password,
-      reffered_Code: userData.reffered_Code?.trim() || '',
-      userImage: userData.userImage?.trim() || ''
-    };
-  }
+    /**
+     * Authenticates user by mobile number
+     * @param mobile - User's mobile number
+     * @returns LoginResponseDto
+     */
+    async authenticateUserByMobile(mobile: string): Promise<LoginResponseDto> {
+      try {
+        // Validate mobile number format
+        if (!mobile || typeof mobile !== 'string' || mobile.trim().length === 0) {
+            throw BadRequestError('Please provide a valid mobile number.')
+        }
+  
+        const user = await this._userRepo.findByMobile(mobile.trim());
 
-  /**
-   * Validates OTP against the provided token
-   * @param otp - OTP provided by user
-   * @param token - JWT token containing the correct OTP
-   * @returns boolean indicating if OTP is valid
-   */
-  private async validateOtp(otp: string, token: string): Promise<boolean> {
-    try {
-      const jwtOtp = this.authService.verifyOtpToken(token) as OtpPayload;
-      return otp === jwtOtp?.clientId;
-    } catch (error) {
-      console.error('OTP validation error:', error);
-      return false;
+        if (!user) {
+        throw NotFoundError("Account not found. Please create a new account.","/signup")
+      }
+        
+        if(user?.account_status =="Block"){
+        throw UnauthorizedError("Your account is blocked. Please contact support!")
+        }
+
+        // Generate tokens
+      const payload:AccessPayload = { id: user.id.toString(), role:user.role };
+
+       const refreshToken = generateJwtToken(
+              payload,
+              process.env.USER_SECRET_KEY as string,
+              "7d"
+           )
+
+       const accessToken = generateJwtToken(
+               payload,
+              process.env.USER_SECRET_KEY as string,
+              "3m"
+             )
+
+      // Validate token creation
+      if (!accessToken || !refreshToken) {
+        throw UnauthorizedError('Failed to generate authentication tokens');
+      }
+        return {
+          _id: user.id,
+          message:"Authentication successful",
+          name:user.name,
+          role:user.role,
+          token:accessToken,
+          refreshToken:refreshToken
+        }
+  
+      } catch (error) {
+        if(error instanceof HttpError) throw error
+        throw InternalError("something went wrong")
+        
+      }
     }
+  
+    /**
+     * Authenticates user by Google email
+     * @param email - User's Google email
+     * @returns LoginResponseDto
+     */
+    async authenticateUserByGoogle(email: string): Promise<LoginResponseDto> {
+      try {
+        // Validate email format
+        if (!email || typeof email !== 'string' || email.trim().length === 0) {
+          return LoginTransformer.transformToLoginResponse({
+            message: 'Please provide a valid email address.'
+          });
+        }
+  
+        const user = await this._userRepo.findByEmail(email.trim().toLowerCase());
+
+        if(!user) throw UnauthorizedError("account not found");
+
+        // Determine user role
+      const role = user.role;
+  
+      // Generate tokens
+      const payload:AccessPayload = { id: user.id.toString(), role: role };
+
+       const refreshToken = generateJwtToken(
+              payload,
+              process.env.USER_SECRET_KEY as string,
+              "7d"
+           )
+
+       const accessToken = generateJwtToken(
+               payload,
+              process.env.USER_SECRET_KEY as string,
+              "3m"
+             )
+
+      // Validate token creation
+      if (!accessToken || !refreshToken) {
+        throw UnauthorizedError('Failed to generate authentication tokens');
+      }
+        return {
+          _id: user.id,
+          message:"Authentication successful",
+          name:user.name,
+          role:user.role,
+          token:accessToken,
+          refreshToken:refreshToken
+        }
+  
+      } catch (error) {
+        console.error('Google authentication error:', error);
+        throw new Error( 'Google authentication failed');
+      }
+    }
+
+    async refreshToken(token: string): Promise<{accessToken:string}> {
+
+    if (!token) throw ForbiddenError("no token provided");
+  
+    const payload = verifyToken(token, process.env.JWT_REFRESH_TOKEN_SECRET as string) as AccessPayload;
+  
+    if (!payload) throw ForbiddenError("token missing");
+  
+    const user = await this._userRepo.findById(payload.id);
+
+    if (!user) throw UnauthorizedError("account not found");
+  
+    if (user.account_status === "Block")
+      throw UnauthorizedError("Your account has been blocked!");
+  
+    const accessToken = generateJwtToken(
+      { id: payload.id, role: payload.role },
+      process.env.JWT_ACCESS_TOKEN_SECRET as string,
+      "3m"
+    );
+  
+    return { accessToken };
   }
 
   /**
-   * Creates a new user with hashed password and referral code
-   * @param userData - Sanitized user data
+   * Registers a new user
+   * @param userData - User registration data
    * @returns Promise<RegisterResponseDto>
    */
-  private async createNewUser(userData: RegisterUserDataDto): Promise<RegisterResponseDto> {
+  async registerUser(userData: RegisterUserDataDto): Promise<RegisterResponseDto> {
     try {
+      // Validate input data
+      const validationResult = RegistrationValidation.validateRegistrationData(userData);
+      
+      if (!validationResult.isValid) throw BadRequestError(validationResult.errors.join(', '))
+
+      // Sanitize input data
+      const sanitizedData = sanitizeService.sanitizeUserData(userData);
+
+      // Check if user already exists
+      const existingUser = await this._userRepo.checkUserExists(
+        sanitizedData.mobile, 
+        sanitizedData.email
+      );
+
+      if (existingUser) throw ConflictError("already registered try to login")
+
+      // Create new user
       const referral_code = generateReferralCode();
-      const hashedPassword = await bcrypt.securePassword(userData.password);
+      // const hashedPassword = await bcryptService.securePassword(userData.password);
 
       const newUserData = {
         name: userData.name,
         email: userData.email,
         mobile: userData.mobile,
-        password: hashedPassword,
+        // password: hashedPassword,
         referral_code,
-        userImage: userData.userImage,
+        user_image: userData.user_image,
       };
 
-      const savedUser = await this.userRepo.create(newUserData);
+      const savedUser = await this._userRepo.create(newUserData);
+
+      if(!savedUser)throw InternalError("Failed to create user");
 
       return RegistrationTransformer.transformToRegisterResponse({
         message: REGISTRATION_CONSTANTS.MESSAGES.REGISTRATION_SUCCESS,
@@ -93,45 +217,12 @@ export class RegistrationService implements IRegistrationService {
           joining_date: savedUser.joining_date,
         }
       });
+    
     } catch (error) {
-      console.error('User creation error:', error);
-      throw new Error(REGISTRATION_CONSTANTS.MESSAGES.REGISTRATION_FAILED);
-    }
-  }
-
-  /**
-   * Registers a new user
-   * @param userData - User registration data
-   * @returns Promise<RegisterResponseDto>
-   */
-  async registerUser(userData: RegisterUserDataDto): Promise<RegisterResponseDto> {
-    try {
-      // Validate input data
-      const validationResult = RegistrationValidation.validateRegistrationData(userData);
-      if (!validationResult.isValid) {
-        throw new Error(validationResult.errors.join(', '));
-      }
-
-      // Sanitize input data
-      const sanitizedData = this.sanitizeUserData(userData);
-
-      // Check if user already exists
-      const existingUser = await this.userRepo.checkUserExists(
-        sanitizedData.mobile, 
-        sanitizedData.email
-      );
-
-      if (existingUser) {
-        return RegistrationTransformer.transformToRegisterResponse({
-          message: REGISTRATION_CONSTANTS.MESSAGES.USER_EXISTS
-        });
-      }
-
-      // Create new user
-      return await this.createNewUser(sanitizedData);
-    } catch (error) {
-      console.error('Registration error:', error);
-      throw handleControllerError(error, 'User registration');
+      console.log("hsdkhfa",error);
+      
+      if(error instanceof HttpError) throw  error
+      throw InternalError("something went wrong");
     }
   }
 
@@ -144,20 +235,21 @@ export class RegistrationService implements IRegistrationService {
   async validateUserExistence(mobile: string, email: string): Promise<CheckUserResponseDto> {
     try {
       // Validate input
-      if (!RegistrationValidation.isValidMobile(mobile)) {
-        throw new Error(REGISTRATION_CONSTANTS.MESSAGES.INVALID_MOBILE);
-      }
+      if (!RegistrationValidation.isValidMobile(mobile)) 
+        throw BadRequestError(REGISTRATION_CONSTANTS.MESSAGES.INVALID_MOBILE)
+
 
       if (!RegistrationValidation.isValidEmail(email)) {
-        throw new Error(REGISTRATION_CONSTANTS.MESSAGES.INVALID_EMAIL);
+        throw BadRequestError(REGISTRATION_CONSTANTS.MESSAGES.INVALID_EMAIL)
       }
 
       // Check if user exists
-      const existingUser = await this.userRepo.checkUserExists(
+      const existingUser = await this._userRepo.checkUserExists(
         mobile.trim(), 
         email.trim().toLowerCase()
       );
 
+      //return existing message true
       if (existingUser) {
         return RegistrationTransformer.transformToCheckUserResponse(
           REGISTRATION_CONSTANTS.MESSAGES.USER_EXISTS,
@@ -166,14 +258,15 @@ export class RegistrationService implements IRegistrationService {
         );
       }
 
+      //return existing message false
       return RegistrationTransformer.transformToCheckUserResponse(
         REGISTRATION_CONSTANTS.MESSAGES.USER_NOT_REGISTERED,
         '',
         false
       );
     } catch (error) {
-      console.error('User validation error:', error);
-      throw handleControllerError(error, 'User existence validation');
+      if(error instanceof HttpError) throw error
+      throw error
     }
   }
 
@@ -187,27 +280,29 @@ export class RegistrationService implements IRegistrationService {
     try {
       // Validate input
       if (!RegistrationValidation.isValidEmail(email)) {
-        throw new Error(REGISTRATION_CONSTANTS.MESSAGES.INVALID_EMAIL);
+        throw BadRequestError(REGISTRATION_CONSTANTS.MESSAGES.INVALID_EMAIL)
       }
 
       if (!name || name.trim().length === 0) {
-        throw new Error(REGISTRATION_CONSTANTS.MESSAGES.INVALID_NAME);
+        throw BadRequestError(REGISTRATION_CONSTANTS.MESSAGES.INVALID_NAME);
       }
 
-      // Generate and send OTP
-      const token = await sendOtp(email.trim().toLowerCase(), name.trim());
-      
-      if (!token) {
-        throw new Error(REGISTRATION_CONSTANTS.MESSAGES.OTP_GENERATION_FAILED);
-      }
+        const otp = generateOTP();
+        console.log("otp==",otp);
+
+      //send OTP
+       await sendOtp(email.trim().toLowerCase(), name.trim(),otp);
+
+       const redisService = await getRedisService();
+       redisService.set(`${email}`,otp,30)
 
       return RegistrationTransformer.transformToResendOtpResponse(
-        REGISTRATION_CONSTANTS.MESSAGES.OTP_SENT_SUCCESS,
-        token
+        REGISTRATION_CONSTANTS.MESSAGES.OTP_SENT_SUCCESS
       );
+
     } catch (error) {
-      console.error('OTP generation error:', error);
-      throw handleControllerError(error, 'OTP generation');
+      if(error instanceof HttpError) throw error
+      throw new Error('something went wrong');
     }
   }
 
@@ -221,20 +316,24 @@ export class RegistrationService implements IRegistrationService {
   async verifyOtpAndRegister(
     userData: RegisterUserDataDto, 
     otp: string, 
-    token: string
+    email: string
   ): Promise<RegisterResponseDto> {
     try {
       // Validate OTP
-      const isValidOtp = await this.validateOtp(otp, token);
-      if (!isValidOtp) {
-        throw new Error(REGISTRATION_CONSTANTS.MESSAGES.INVALID_OTP);
-      }
+      const redisService = getRedisService();
+      const storedOtp = await redisService.get(`${email}`)
+      
+      console.log("storedOtp",storedOtp,otp);
+
+        if (storedOtp !== otp) {
+            throw BadRequestError(REGISTRATION_CONSTANTS.MESSAGES.INVALID_OTP)
+        }
 
       // Register user
       return await this.registerUser(userData);
     } catch (error) {
-      console.error('OTP verification and registration error:', error);
-      throw handleControllerError(error, 'OTP verification and registration');
+      if (error instanceof HttpError) throw error
+      throw new Error( 'something went wrong');
     }
   }
 }

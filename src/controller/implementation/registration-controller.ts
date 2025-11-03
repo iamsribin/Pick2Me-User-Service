@@ -1,95 +1,164 @@
-import { handleControllerError } from "../../utilities/handleError";
-import { 
-  SignupRequestDto, 
-  CheckUserRequestDto, 
-  ResendOtpRequestDto  
-} from '../../dto/request/registration-request.dto';
-import { 
-  RegisterResponseDto, 
-  CheckUserResponseDto, 
-  ResendOtpResponseDto 
-} from '../../dto/response/registration-response.dto';
-import { ControllerCallback } from '../interfaces/i-login-controller';
-import { IRegistrationController } from '../interfaces/i-register-controller';
-import { IRegistrationService } from '../../services/interfaces/i-registration-service';
-import { TYPES } from "../../inversify/types";
+import { Request, Response, NextFunction, response } from "express";
 import { inject, injectable } from "inversify";
+import { IRegistrationService } from "../../services/interfaces/i-registration-service";
+import { TYPES } from "../../inversify/types";
+import { ConflictError, ForbiddenError, StatusCode } from "@retro-routes/shared";
+import { uploadToS3Public } from "../../utils/s3";
 
 @injectable()
-export class RegistrationController implements IRegistrationController {
-  constructor(@inject(TYPES.RegistrationService) private readonly _registrationService: IRegistrationService) {}
+export class RegistrationController {
+  constructor(
+    @inject(TYPES.RegistrationService) private readonly _registrationService: IRegistrationService) {}
 
   /**
-   * Handles user registration with OTP verification
-   * @param call - Request object containing user data, OTP, and token
-   * @param callback - Callback to return the registration result or error
+   * POST /api/user/register
+   * Expects multipart/form-data (userImage optional) and OTP present in body.
    */
-  async signup(
-    call: { request: SignupRequestDto },
-    callback: ControllerCallback<RegisterResponseDto>
-  ): Promise<void> {
+  register = async (req: Request, res: Response, _next: NextFunction) => {
     try {
-      const { name, email, mobile, password, reffered_Code, userImage, otp, token } = call.request;
+          const {
+      name,
+      email,
+      mobile,
+      password,
+      reffered_Code,
+      otp, 
+    } = req.body;
 
-      const result = await this._registrationService.verifyOtpAndRegister(
-        { name, email, mobile, password, reffered_Code, userImage },
-        otp,
-        token
-      );
+      const file = req.file as Express.Multer.File | undefined;
+      
+      let user_image = "https://retro-routes-store.s3.eu-north-1.amazonaws.com/1762197847863-Gemini_Generated_Image_dmzlyqdmzlyqdmzl.png"
+      
+      console.log("file",file);
 
-      callback(null, result);
+        if (file) {
+            user_image = await uploadToS3Public(file);
+            }
+          console.log("userImage",user_image);
+
+
+    const payload = { name, email, mobile, password, reffered_Code, user_image };
+
+    const result = await this._registrationService.verifyOtpAndRegister(payload, otp, email);
+
+    res.status(201).json(result);
     } catch (error) {
-      callback(handleControllerError(error, 'User registration'));
+      _next(error)
     }
-  }
+  };
 
   /**
-   * Checks if user exists and sends OTP if not registered
-   * @param call - Request object containing mobile, email, and name
-   * @param callback - Callback to return the check result or error
+   * POST /api/user/checkUser
+   * Checks if user exists and issues OTP when missing. Returns { token, message, userExists? }
    */
-  async checkUser(
-    call: { request: CheckUserRequestDto },
-    callback: ControllerCallback<CheckUserResponseDto>
-  ): Promise<void> {
-    try {
-      const { mobile, email, name } = call.request;
-      
-      const userCheckResult = await this._registrationService.validateUserExistence(mobile, email);
-      
-      // If user doesn't exist, generate and send OTP
-      if (!userCheckResult.userExists) {
-        const otpResult = await this._registrationService.generateAndSendOtp(email, name);
-        callback(null, {
-          message: userCheckResult.message,
-          token: otpResult.token,
-          userExists: false
-        });
-        return;
-      }
+  checkUser = async (req: Request, res: Response, _next: NextFunction) => {
+    try{
+    const { mobile, email, name } = req.body;
 
-      callback(null, userCheckResult);
-    } catch (error) {
-      callback(handleControllerError(error, 'User check'));
+    const userCheckResult = await this._registrationService.validateUserExistence(mobile, email);
+    
+    if(userCheckResult.userExists) throw ConflictError("you already created a account please login!")
+     
+      const response = await this._registrationService.generateAndSendOtp(email, name);
+
+      return res.status(StatusCode.Created).json(response);
+
+     }catch(error){
+      _next(error)
     }
-  }
+  };
 
   /**
-   * Resends OTP to user's email
-   * @param call - Request object containing email and name
-   * @param callback - Callback to return the OTP resend result or error
+   * POST /api/user/resendOtp
    */
-  async resendOtp(
-    call: { request: ResendOtpRequestDto },
-    callback: ControllerCallback<ResendOtpResponseDto>
-  ): Promise<void> {
+  resendOtp = async (req: Request, res: Response, _next: NextFunction) => {
     try {
-      const { email, name } = call.request;
-      
+      const { email, name } = req.body;
+  
       const result = await this._registrationService.generateAndSendOtp(email, name);
-      callback(null, result);
+  
+      // const cookieOptions = {
+      //   httpOnly: true,
+      //   expires: new Date(Date.now() + 180_000),
+      //   sameSite: process.env.NODE_ENV === "production" ? "none" as const : "lax" as const,
+      //   secure: process.env.NODE_ENV === "production",
+      // };
+  
+      // res.cookie("otp", result.token, cookieOptions);
+      res.status(201).json(result);
+      
     } catch (error) {
-      callback(handleControllerError(error, 'OTP resend'));
+      _next(error);
     }
-  }
+  };
+
+
+    /**
+   * POST /api/user/checkLoginUser
+   * Body: { mobile }
+   */
+  checkLoginUser = async (req: Request, res: Response, _next: NextFunction) => {
+    try {
+      
+      const { mobile } = req.body;
+      const result = await this._registrationService.authenticateUserByMobile(mobile);
+       
+            const { refreshToken, ...responseWithoutToken } = result;
+  
+              res.cookie("refreshToken", refreshToken, {
+                  httpOnly: true,
+                  secure: process.env.NODE_ENV === 'production',
+                  sameSite: 'strict',
+                  maxAge: 7 * 24 * 60 * 60 * 1000,
+              });
+  
+      res.status(200).json(responseWithoutToken);
+    } catch (error) {
+      _next(error)
+    }
+  };
+    async refreshToken(
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> {
+        try {
+            const refreshToken = req.cookies.refreshToken;
+
+            // if (!req.cookies) throw ForbiddenError("token missing")
+
+            const accessToken  = await this._registrationService.refreshToken(refreshToken);
+            res.status(200).json({accessToken });
+            
+        } catch (err: unknown) {
+            next(err);
+        }
+   
+ }
+  /**
+   * POST /api/user/checkGoogleLoginUser
+   * Body: { email }
+   */
+  checkGoogleLoginUser = async (req: Request, res: Response, _next: NextFunction) => {
+    try {
+      const { email } = req.body;
+      const result = await this._registrationService.authenticateUserByGoogle(email);
+      res.status(200).json(result);
+    } catch (error) {
+      _next(error)
+    }
+  };
+
+    logout = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {     
+          console.log("logout");
+               
+             res.clearCookie("refreshToken");
+            res.status(StatusCode.OK).json({ message: "successfully logged out" })
+        } catch (err) {
+          console.log("err",err);
+          
+            next(err)
+        }
+    }
 }
