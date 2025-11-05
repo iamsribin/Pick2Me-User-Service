@@ -1,8 +1,8 @@
 import { injectable } from 'inversify';
 import { User } from '../../entities/user.entity';
 import { IUserRepository } from '../interface/i-user-repository';
-import { SqlBaseRepository } from '@retro-routes/shared';
 import { AppDataSource } from '../../config/sql-database';
+import { SqlBaseRepository } from '@Pick2Me/shared';
 
 @injectable()
 export class UserRepository extends SqlBaseRepository<User> implements IUserRepository {

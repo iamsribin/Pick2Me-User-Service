@@ -4,7 +4,7 @@ import { upload } from "../middleware/multer";
 import container from "../inversify/inversify.config";
 import { TYPES } from "../inversify/types";
 import { UserController } from "../controller/implementation/user-controller";
-import { catchAsync } from "@retro-routes/shared";
+import { catchAsync } from "@Pick2Me/shared";
 
 const userController = container.get<UserController>(TYPES.UserController);
 

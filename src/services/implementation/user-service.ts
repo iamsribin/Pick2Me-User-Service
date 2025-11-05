@@ -4,7 +4,7 @@ import { UserProfileDto } from "../../dto/response/user-response.dto";
 import { IUserRepository } from "../../repositories/interface/i-user-repository";
 import { IUserService } from "../interfaces/i-user-service";
 import { TYPES } from "../../inversify/types";
-import { StatusCode } from "@retro-routes/shared";
+import { StatusCode, UnauthorizedError } from "@Pick2Me/shared";
 
 @injectable()
 export class UserService implements IUserService {
@@ -14,15 +14,10 @@ export class UserService implements IUserService {
 
   async fetchUserProfile(id: string): Promise<IResponse<UserProfileDto>> {
     try {
+
       const user = await this._userRepo.findById(id);
 
-      if (!user) {
-        return {
-          message: "no user found",
-          status: StatusCode.NotFound,
-          data: null,
-        };
-      }
+      if (!user) throw UnauthorizedError("Access denied. User not found");
 
       const data: UserProfileDto = {
         id: user.id,

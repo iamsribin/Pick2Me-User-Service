@@ -12,7 +12,7 @@ import {
 import { IAdminRepository } from "../../repositories/interface/i-admin-repository";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../inversify/types";
-import { BadRequestError } from "@retro-routes/shared";
+import { BadRequestError } from "@Pick2Me/shared";
 
 @injectable()
 export class AdminService implements IAdminService {

@@ -1,4 +1,4 @@
-import { envChecker } from "@retro-routes/shared";
+import { envChecker } from "@Pick2Me/shared";
 
 export const isEnvDefined = () => {
   envChecker(process.env.PORT, "PORT");

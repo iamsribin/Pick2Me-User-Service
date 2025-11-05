@@ -14,7 +14,7 @@ import { IUserRepository } from '../../repositories/interface/i-user-repository'
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../../inversify/types';
 import { LoginResponseDto } from '../../dto/response/login-response.dto';
-import { AccessPayload, BadRequestError, ConflictError, ForbiddenError, generateJwtToken, getRedisService, HttpError, InternalError, NotFoundError, UnauthorizedError, verifyToken } from '@retro-routes/shared';
+import { AccessPayload, BadRequestError, ConflictError, ForbiddenError, generateJwtToken, getRedisService, HttpError, InternalError, NotFoundError, UnauthorizedError, verifyToken } from '@Pick2Me/shared';
 import { sanitizeService } from '../../utils/sql-validation/sanitization';
 import generateOTP from '../../utils/generateOtp';
 
@@ -99,7 +99,8 @@ export class RegistrationService implements IRegistrationService {
 
         // Determine user role
       const role = user.role;
-  
+      console.log({ id: user.id.toString(), role: role });
+      
       // Generate tokens
       const payload:AccessPayload = { id: user.id.toString(), role: role };
 

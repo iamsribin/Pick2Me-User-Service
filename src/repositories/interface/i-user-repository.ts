@@ -1,4 +1,4 @@
-import { ISqlBaseRepository } from '@retro-routes/shared';
+import { ISqlBaseRepository } from '@Pick2Me/shared';
 import { User } from '../../entities/user.entity';
 
 export interface IUserRepository extends ISqlBaseRepository<User> {

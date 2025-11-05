@@ -2,7 +2,7 @@ import { Request, Response, NextFunction, response } from "express";
 import { inject, injectable } from "inversify";
 import { IRegistrationService } from "../../services/interfaces/i-registration-service";
 import { TYPES } from "../../inversify/types";
-import { ConflictError, ForbiddenError, StatusCode } from "@retro-routes/shared";
+import { ConflictError, ForbiddenError, StatusCode } from "@Pick2Me/shared";
 import { uploadToS3Public } from "../../utils/s3";
 
 @injectable()
@@ -107,11 +107,11 @@ export class RegistrationController {
       _next(error)
     }
   };
-    async refreshToken(
+     refreshToken = async(
         req: Request,
         res: Response,
         next: NextFunction
-    ): Promise<void> {
+    ): Promise<void> => {
         try {
             const refreshToken = req.cookies.refreshToken;
 
@@ -122,7 +122,7 @@ export class RegistrationController {
             
         } catch (err: unknown) {
             next(err);
-        }
+        } 
    
  }
   /**
@@ -133,8 +133,21 @@ export class RegistrationController {
     try {
       const { email } = req.body;
       const result = await this._registrationService.authenticateUserByGoogle(email);
-      res.status(200).json(result);
-    } catch (error) {
+              
+      const { refreshToken, ...responseWithoutToken } = result;
+     console.log({ refreshToken, ...responseWithoutToken });
+     
+      res.cookie("refreshToken", refreshToken, {
+              httpOnly: true,
+              secure: process.env.NODE_ENV === 'production',
+              sameSite: 'strict',
+              maxAge: 7 * 24 * 60 * 60 * 1000,
+          });
+  
+      res.status(200).json(responseWithoutToken);    
+     } catch (error) {
+      console.log("err",error);
+      
       _next(error)
     }
   };
