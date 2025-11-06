@@ -18,10 +18,4 @@ export class LoginResponseDto {
 
   @Expose()
   refreshToken!: string;
-
-  // @Expose()
-  // mobile?: string;
-
-  // @Expose()
-  // profile?: string;
 }

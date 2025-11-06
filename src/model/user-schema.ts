@@ -1,5 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
-import { WalletTransaction } from './wallet-transaction.entity';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
 
 @Entity()
 export class User {
@@ -14,9 +13,6 @@ export class User {
 
   @Column({ unique: true, type: 'bigint' })
   mobile!: string;
-
-  // @Column()
-  // password!: string;
 
   @Column({ nullable: true })
   user_image!: string;

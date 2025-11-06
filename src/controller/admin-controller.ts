@@ -1,17 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import { inject, injectable } from 'inversify';
-import { IAdminService } from '../../services/interfaces/i-admin-service';
-import { TYPES } from '../../types/container-type';
+import { IAdminService } from '../services/interfaces/i-admin-service';
+import { TYPES } from '../types/container-type';
 
 @injectable()
 export class AdminController {
   constructor(@inject(TYPES.AdminService) private readonly _adminService: IAdminService) {}
 
-  /**
-   * GET /getActiveUserData
-   * Query: page, limit, search, status
-   * Response: { users: [], pagination: { page, limit, total, totalPages } }
-   */
   getUsersList = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { page = '1', limit = '6', search = '', status } = req.query;
@@ -35,10 +30,6 @@ export class AdminController {
     }
   };
 
-  /**
-   * GET /blockedUserData
-   * Returns users with "Block" status (paginated, search supported)
-   */
   getBlockedUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { page = '1', limit = '6', search = '' } = req.query;
@@ -62,11 +53,6 @@ export class AdminController {
     }
   };
 
-  /**
-   * GET /userData
-   * Query: id
-   * Response: { user: {...} } or 404
-   */
   getUserData = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id = String(req.query.id || '');
@@ -89,11 +75,6 @@ export class AdminController {
     }
   };
 
-  /**
-   * PATCH /updateUserStatus
-   * Query: id
-   * Body: { status: "Good" | "Block", reason?: string }
-   */
   updateUserStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id = String(req.query.id || '');

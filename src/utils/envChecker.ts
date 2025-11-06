@@ -8,7 +8,8 @@ export const isEnvDefined = () => {
   envChecker(process.env.SQL_PORT, 'SQL_PORT');
   envChecker(process.env.SQL_USER, 'SQL_USER');
   envChecker(process.env.SQL_PASSWORD, 'SQL_PASSWORD');
-
   envChecker(process.env.NODEMAILER_USER, 'NODEMAILER_USER');
-  envChecker(process.env.NODEMAILER_PASS, 'CLOUDINARY_API_KEY');
+  envChecker(process.env.TOKEN_SECRET, 'TOKEN_SECRET');
+  envChecker(process.env.GATEWAY_SHARED_SECRET, 'GATEWAY_SHARED_SECRET');
+  envChecker(process.env.REDIS_URL, 'REDIS_URL');
 };

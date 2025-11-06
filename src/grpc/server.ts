@@ -2,13 +2,12 @@ import * as grpc from '@grpc/grpc-js';
 import { userServiceDescriptor } from '@Pick2Me/shared';
 import { createUserHandlers } from './handlers/user-handlers';
 import container from '../config/inversify.config';
-
-import { IRegistrationController } from '../controller/interfaces/i-register-controller';
-import { IAdminController } from '../controller/interfaces/i-admin-controller';
 import { TYPES } from '../types/container-type';
+import { AdminController } from '../controller/admin-controller';
+import { RegistrationController } from '../controller/registration-controller';
 
-const registrationController = container.get<IRegistrationController>(TYPES.RegistrationController);
-const adminController = container.get<IAdminController>(TYPES.AdminController);
+const registrationController = container.get<RegistrationController>(TYPES.RegistrationController);
+const adminController = container.get<AdminController>(TYPES.AdminController);
 
 if (!userServiceDescriptor) {
   console.error('userServiceDescriptor is missing. Inspect loaded proto package.');
@@ -24,10 +23,9 @@ export const startGrpcServer = () => {
   try {
     const server = new grpc.Server();
 
-    // Regiser user service gRPC functions
+    // Register user service gRPC functions
     server.addService(userServiceDescriptor, handlers);
 
-    // Bind server
     server.bindAsync(
       process.env.GRPC_URL as string,
       grpc.ServerCredentials.createInsecure(),

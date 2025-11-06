@@ -3,7 +3,7 @@ import { IAdminService } from '../interfaces/i-admin-service';
 import { UserDto } from '../../dto/transformer/user.dto';
 import { UserProfileResponseDto } from '../../dto/transformer/user-profile.dto';
 import { IUpdateUserStatusGrpcResponse, UserListDTO } from '../../dto/response/admin-response.dto';
-import { IUserDto } from '../../dto/response/i-profile.dto';
+import { IUserDto } from '../../dto/response/profile.dto';
 import { IAdminRepository } from '../../repositories/interface/i-admin-repository';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../../types/container-type';

@@ -6,7 +6,6 @@ class SanitizeService {
       name: userData.name?.trim(),
       email: userData.email?.trim().toLowerCase(),
       mobile: userData.mobile?.trim(),
-      // password: userData.password,
       reffered_Code: userData.reffered_Code?.trim() || '',
       user_image: userData.user_image?.trim() || '',
     };

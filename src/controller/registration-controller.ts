@@ -1,9 +1,9 @@
-import { Request, Response, NextFunction, response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { inject, injectable } from 'inversify';
-import { IRegistrationService } from '../../services/interfaces/i-registration-service';
+import { IRegistrationService } from '../services/interfaces/i-registration-service';
 import { ConflictError, ForbiddenError, StatusCode } from '@Pick2Me/shared';
-import { uploadToS3Public } from '../../utils/s3';
-import { TYPES } from '../../types/container-type';
+import { uploadToS3Public } from '../utils/s3';
+import { TYPES } from '../types/container-type';
 
 @injectable()
 export class RegistrationController {
@@ -53,9 +53,6 @@ export class RegistrationController {
     }
   };
 
-  /**
-   * POST /api/user/resendOtp
-   */
   resendOtp = async (req: Request, res: Response, _next: NextFunction) => {
     try {
       const { email, name } = req.body;
@@ -68,10 +65,6 @@ export class RegistrationController {
     }
   };
 
-  /**
-   * POST /api/user/checkLoginUser
-   * Body: { mobile }
-   */
   checkLoginUser = async (req: Request, res: Response, _next: NextFunction) => {
     try {
       const { mobile } = req.body;
@@ -91,6 +84,7 @@ export class RegistrationController {
       _next(error);
     }
   };
+
   refreshToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const refreshToken = req.cookies.refreshToken;
@@ -98,22 +92,18 @@ export class RegistrationController {
       if (!req.cookies) throw ForbiddenError('token missing');
 
       const accessToken = await this._registrationService.refreshToken(refreshToken);
-      res.status(200).json({ accessToken });
+      res.status(200).json(accessToken);
     } catch (err: unknown) {
       next(err);
     }
   };
-  /**
-   * POST /api/user/checkGoogleLoginUser
-   * Body: { email }
-   */
+
   checkGoogleLoginUser = async (req: Request, res: Response, _next: NextFunction) => {
     try {
       const { email } = req.body;
       const result = await this._registrationService.authenticateUserByGoogle(email);
 
       const { refreshToken, ...responseWithoutToken } = result;
-      console.log({ refreshToken, ...responseWithoutToken });
 
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
@@ -124,8 +114,6 @@ export class RegistrationController {
 
       res.status(200).json(responseWithoutToken);
     } catch (error) {
-      console.log('err', error);
-
       _next(error);
     }
   };

@@ -1,6 +1,6 @@
 import { injectable } from 'inversify';
 import { IAdminRepository } from '../interface/i-admin-repository';
-import { Like, ILike } from 'typeorm';
+import { ILike } from 'typeorm';
 import { AppDataSource } from '../../config/sql-database';
 import { SqlBaseRepository } from '@Pick2Me/shared';
 import { User } from '../../model/user-schema';
@@ -11,7 +11,6 @@ export class AdminRepository extends SqlBaseRepository<User> implements IAdminRe
     super(User, AppDataSource);
   }
 
-  // New method with pagination and search
   async findUsersByStatusWithPagination(
     status: 'Good' | 'Block',
     page: number = 1,
@@ -21,21 +20,17 @@ export class AdminRepository extends SqlBaseRepository<User> implements IAdminRe
     try {
       const offset = (page - 1) * limit;
 
-      // Base query conditions
       const baseWhere: any = {
         account_status: status,
         is_admin: false,
       };
 
-      // Add search conditions if search term is provided
       if (search) {
-        // Search in name and email fields (case-insensitive)
         const searchConditions = [
           { ...baseWhere, name: ILike(`%${search}%`) },
           { ...baseWhere, email: ILike(`%${search}%`) },
         ];
 
-        // Execute queries with search conditions
         const [users, totalCount] = await Promise.all([
           this.repo.find({
             where: searchConditions,
@@ -52,7 +47,7 @@ export class AdminRepository extends SqlBaseRepository<User> implements IAdminRe
               'completed_ride_count',
             ],
             order: {
-              joining_date: 'DESC', // Most recent first
+              joining_date: 'DESC',
             },
             skip: offset,
             take: limit,
@@ -64,7 +59,6 @@ export class AdminRepository extends SqlBaseRepository<User> implements IAdminRe
 
         return { users, totalCount };
       } else {
-        // Execute queries without search conditions
         const [users, totalCount] = await Promise.all([
           this.repo.find({
             where: baseWhere,
@@ -81,7 +75,7 @@ export class AdminRepository extends SqlBaseRepository<User> implements IAdminRe
               'completed_ride_count',
             ],
             order: {
-              joining_date: 'DESC', // Most recent first
+              joining_date: 'DESC',
             },
             skip: offset,
             take: limit,
@@ -93,12 +87,11 @@ export class AdminRepository extends SqlBaseRepository<User> implements IAdminRe
 
         return { users, totalCount };
       }
-    } catch (error) {
+    } catch {
       return null;
     }
   }
 
-  // Keep the original method for backward compatibility
   async findUsersByStatus(status: 'Good' | 'Block'): Promise<User[] | null> {
     try {
       return await this.repo.find({
@@ -122,7 +115,7 @@ export class AdminRepository extends SqlBaseRepository<User> implements IAdminRe
           joining_date: 'DESC',
         },
       });
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -133,7 +126,7 @@ export class AdminRepository extends SqlBaseRepository<User> implements IAdminRe
         where: { id },
         relations: ['transactions'],
       });
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -146,7 +139,7 @@ export class AdminRepository extends SqlBaseRepository<User> implements IAdminRe
     try {
       await this.repo.update(id, { account_status: status, reason });
       return await this.repo.findOne({ where: { id } });
-    } catch (error) {
+    } catch {
       return null;
     }
   }

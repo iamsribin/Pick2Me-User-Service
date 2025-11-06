@@ -1,10 +1,16 @@
 import { inject, injectable } from 'inversify';
-import { IResponse } from '../../dto/request/user-response.dto';
 import { UserProfileDto } from '../../dto/response/user-response.dto';
 import { IUserRepository } from '../../repositories/interface/i-user-repository';
 import { IUserService } from '../interfaces/i-user-service';
 import { TYPES } from '../../types/container-type';
-import { StatusCode, UnauthorizedError } from '@Pick2Me/shared';
+import {
+  HttpError,
+  InternalError,
+  IResponse,
+  StatusCode,
+  UnauthorizedError,
+} from '@Pick2Me/shared';
+import { REGISTRATION_CONSTANTS } from '../../constants/registration-constants';
 
 @injectable()
 export class UserService implements IUserService {
@@ -26,8 +32,8 @@ export class UserService implements IUserService {
         joiningDate: user.joining_date,
         accountStatus: user.account_status,
         wallet: {
-          balance: user.wallet_balance,
-          transactions: user.transactions?.length || 0,
+          balance: 0,
+          transactions: 0,
         },
         rideDetails: {
           completedRides: Number(user.completed_ride_count),
@@ -41,12 +47,8 @@ export class UserService implements IUserService {
         data,
       };
     } catch (error) {
-      console.error(error);
-      return {
-        message: 'something went wrong',
-        status: StatusCode.InternalServerError,
-        data: null,
-      };
+      if (error instanceof HttpError) throw error;
+      throw InternalError(REGISTRATION_CONSTANTS.MESSAGES.INTERNAL_ERROR);
     }
   }
 }

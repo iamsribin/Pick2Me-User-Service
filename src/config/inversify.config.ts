@@ -9,9 +9,9 @@ import { UserService } from '../services/implementation/user-service';
 import { RegistrationService } from '../services/implementation/registration-service';
 import { AdminService } from '../services/implementation/admin-service';
 
-import { UserController } from '../controller/implementation/user-controller';
-import { RegistrationController } from '../controller/implementation/registration-controller';
-import { AdminController } from '../controller/implementation/admin-controller';
+import { UserController } from '../controller/user-controller';
+import { RegistrationController } from '../controller/registration-controller';
+import { AdminController } from '../controller/admin-controller';
 
 import { IUserRepository } from '../repositories/interface/i-user-repository';
 import { IAdminRepository } from '../repositories/interface/i-admin-repository';

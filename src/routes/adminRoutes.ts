@@ -1,8 +1,8 @@
 import express from 'express';
 import container from '../config/inversify.config';
-import { TYPES } from '../inversify/types';
-import { catchAsync } from '@retro-routes/shared';
-import { AdminController } from '../controller/implementation/admin-controller';
+import { AdminController } from '../controller/admin-controller';
+import { TYPES } from '../types/container-type';
+import { catchAsync } from '@Pick2Me/shared';
 
 const adminUserController = container.get<AdminController>(TYPES.AdminController);
 

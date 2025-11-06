@@ -1,9 +1,7 @@
 import express from 'express';
-
 import { upload } from '../middleware/multer';
 import container from '../config/inversify.config';
-
-import { RegistrationController } from '../controller/implementation/registration-controller';
+import { RegistrationController } from '../controller/registration-controller';
 import { catchAsync } from '@Pick2Me/shared';
 import { TYPES } from '../types/container-type';
 

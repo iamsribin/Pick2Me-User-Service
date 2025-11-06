@@ -13,7 +13,7 @@ export class UserRepository extends SqlBaseRepository<User> implements IUserRepo
   async findByMobile(mobile: string): Promise<User | null> {
     try {
       return await this.findOne({ mobile });
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -21,7 +21,7 @@ export class UserRepository extends SqlBaseRepository<User> implements IUserRepo
   async findByEmail(email: string): Promise<User | null> {
     try {
       return await this.findOne({ email });
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -31,7 +31,7 @@ export class UserRepository extends SqlBaseRepository<User> implements IUserRepo
       return await this.repo.findOne({
         where: [{ mobile }, { email }],
       });
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -42,7 +42,7 @@ export class UserRepository extends SqlBaseRepository<User> implements IUserRepo
         where: { id },
         relations: ['transactions'],
       });
-    } catch (error) {
+    } catch {
       return null;
     }
   }
