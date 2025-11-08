@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { inject, injectable } from 'inversify';
-import { IRegistrationService } from '../services/interfaces/i-registration-service';
+import { IRegistrationService } from '../services/interfaces/i-auth-service';
 import { ConflictError, StatusCode } from '@Pick2Me/shared';
 import { uploadToS3Public } from '../utils/s3';
 import { TYPES } from '../types/container-type';
@@ -20,7 +20,6 @@ export class RegistrationController {
       let user_image =
         'https://retro-routes-store.s3.eu-north-1.amazonaws.com/1762197847863-Gemini_Generated_Image_dmzlyqdmzlyqdmzl.png';
 
-      console.log('file', file);
 
       if (file) {
         user_image = await uploadToS3Public(file);
@@ -30,7 +29,7 @@ export class RegistrationController {
 
       const result = await this._registrationService.verifyOtpAndRegister(payload, otp, email);
 
-      res.status(201).json(result);
+      res.status(StatusCode.Created).json(result);
     } catch (error) {
       _next(error);
     }
@@ -59,7 +58,7 @@ export class RegistrationController {
 
       const result = await this._registrationService.generateAndSendOtp(email, name);
 
-      res.status(201).json(result);
+      res.status(StatusCode.Created).json(result);
     } catch (error) {
       _next(error);
     }
@@ -88,7 +87,7 @@ export class RegistrationController {
 
       console.log('set both in cookie goole');
 
-      res.status(200).json(responseWithoutToken);
+      res.status(StatusCode.OK).json(responseWithoutToken);
     } catch (error) {
       _next(error);
     }

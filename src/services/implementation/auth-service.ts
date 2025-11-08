@@ -1,4 +1,4 @@
-import { IRegistrationService } from '../interfaces/i-registration-service';
+import { IRegistrationService } from '../interfaces/i-auth-service';
 import { generateReferralCode } from '../../utils/refferalCodeGenarate';
 import { sendOtp } from '../../utils/otpSending';
 import { RegistrationValidation } from '../../utils/sql-validation/registrationValidation';
@@ -146,6 +146,7 @@ export class RegistrationService implements IRegistrationService {
         mobile: userData.mobile,
         referral_code,
         user_image: userData.user_image,
+        joining_date:new Date()
       };
 
       const savedUser = await this._userRepo.create(newUserData);

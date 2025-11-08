@@ -1,4 +1,4 @@
-import { Expose } from 'class-transformer';
+import { Expose, Transform } from 'class-transformer';
 
 export class UserDto {
   @Expose()
@@ -13,26 +13,15 @@ export class UserDto {
   @Expose()
   mobile!: string;
 
-  @Expose()
-  user_image!: string;
+  @Expose({name:"user_image"})
+  avatar!: string;
 
-  @Expose()
-  referral_code!: string;
+  @Expose({ name: "account_status" })
+  accountStatus!: "Good" | "Block";
 
-  @Expose()
-  account_status!: string;
-
-  @Expose()
-  joining_date!: string;
-
-  @Expose()
-  wallet_balance?: number;
-
-  @Expose()
-  cancel_ride_count?: number;
-
-  @Expose()
-  completed_ride_count?: number;
+  @Expose({ name: "joining_date" })
+  @Transform(({ value }) => (value ? new Date(value).toLocaleDateString() : value))
+  joiningDate!: string;
 }
 
 // Pagination DTO

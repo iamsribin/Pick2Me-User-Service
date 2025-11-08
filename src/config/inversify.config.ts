@@ -6,11 +6,11 @@ import { UserRepository } from '../repositories/implementation/user-repo';
 import { AdminRepository } from '../repositories/implementation/admin-repo';
 
 import { UserService } from '../services/implementation/user-service';
-import { RegistrationService } from '../services/implementation/registration-service';
+import { RegistrationService } from '../services/implementation/auth-service';
 import { AdminService } from '../services/implementation/admin-service';
 
 import { UserController } from '../controller/user-controller';
-import { RegistrationController } from '../controller/registration-controller';
+import { RegistrationController } from '../controller/auth-controller';
 import { AdminController } from '../controller/admin-controller';
 
 import { IUserRepository } from '../repositories/interface/i-user-repository';
