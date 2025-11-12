@@ -2,20 +2,20 @@ import { Container } from 'inversify';
 import 'reflect-metadata';
 
 // implementations
-import { UserRepository } from '../repositories/implementation/user-repo';
-import { AdminRepository } from '../repositories/implementation/admin-repo';
+import { UserRepository } from '@/repositories/implementation/user-repo';
+import { AdminRepository } from '@/repositories/implementation/admin-repo';
 
-import { UserService } from '../services/implementation/user-service';
-import { RegistrationService } from '../services/implementation/auth-service';
-import { AdminService } from '../services/implementation/admin-service';
+import { UserService } from '@/services/implementation/user-service';
+import { RegistrationService } from '@/services/implementation/auth-service';
+import { AdminService } from '@/services/implementation/admin-service';
 
-import { UserController } from '../controller/user-controller';
-import { RegistrationController } from '../controller/auth-controller';
-import { AdminController } from '../controller/admin-controller';
+import { UserController } from '@/controller/user-controller';
+import { RegistrationController } from '@/controller/auth-controller';
+import { AdminController } from '@/controller/admin-controller';
 
-import { IUserRepository } from '../repositories/interface/i-user-repository';
-import { IAdminRepository } from '../repositories/interface/i-admin-repository';
-import { TYPES } from '../types/container-type';
+import { IUserRepository } from '@/repositories/interface/i-user-repository';
+import { IAdminRepository } from '@/repositories/interface/i-admin-repository';
+import { TYPES } from '@/types/container-type';
 
 export const container = new Container();
 

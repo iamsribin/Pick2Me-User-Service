@@ -1,12 +1,12 @@
 import { plainToInstance } from 'class-transformer';
 import { IAdminService } from '../interfaces/i-admin-service';
-import { UserDto } from '../../dto/transformer/user.dto';
-import { UserProfileResponseDto } from '../../dto/transformer/user-profile.dto';
-import { AdminUserListDto } from '../../dto/response/admin-response.dto';
-import { IUserDto } from '../../dto/response/profile.dto';
-import { IAdminRepository } from '../../repositories/interface/i-admin-repository';
+import { UserDto } from '@/dto/transformer/user.dto';
+import { UserProfileResponseDto } from '@/dto/transformer/user-profile.dto';
+import { AdminUserListDto } from '@/dto/response/admin-response.dto';
+import { IUserDto } from '@/dto/response/profile.dto';
+import { IAdminRepository } from '@/repositories/interface/i-admin-repository';
 import { inject, injectable } from 'inversify';
-import { TYPES } from '../../types/container-type';
+import { TYPES } from '@/types/container-type';
 import { InternalError, IResponse, StatusCode } from '@Pick2Me/shared';
 
 @injectable()
@@ -59,7 +59,7 @@ export class AdminService implements IAdminService {
         pagination,
       };
     } catch {
-      throw InternalError("something went wrong")
+      throw InternalError('something went wrong');
     }
   }
 
@@ -90,7 +90,7 @@ export class AdminService implements IAdminService {
         throw new Error('User not found');
       }
 
-      return { status:StatusCode.OK, message: 'User status updated successfully' };
+      return { status: StatusCode.OK, message: 'User status updated successfully' };
     } catch {
       throw new Error('User status update');
     }

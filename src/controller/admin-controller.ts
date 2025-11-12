@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { inject, injectable } from 'inversify';
-import { IAdminService } from '../services/interfaces/i-admin-service';
-import { TYPES } from '../types/container-type';
+import { IAdminService } from '@/services/interfaces/i-admin-service';
+import { TYPES } from '@/types/container-type';
 
 @injectable()
 export class AdminController {
@@ -22,8 +22,8 @@ export class AdminController {
         String(search).trim()
       );
 
-      console.log("result",result);
-      
+      console.log('result', result);
+
       res.status(200).json({
         users: result.users || [],
         pagination: result.pagination || {
@@ -37,29 +37,6 @@ export class AdminController {
       next(err);
     }
   };
-
-  // getBlockedUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  //   try {
-  //     const { page = '1', limit = '6', search = '' } = req.query;
-
-  //     const pageNum = Math.max(1, parseInt(String(page), 10) || 1);
-  //     const limitNum = Math.min(50, Math.max(1, parseInt(String(limit), 10) || 6));
-
-  //     const result = await this._adminService.getUserWithStatusPaginated(
-  //       'Block',
-  //       pageNum,
-  //       limitNum,
-  //       String(search).trim()
-  //     );
-
-  //     const users = result.users || [];
-  //     const pagination = result.pagination || {};
-
-  //     res.status(200).json({ users, pagination });
-  //   } catch (err) {
-  //     next(err);
-  //   }
-  // };
 
   getUserData = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {

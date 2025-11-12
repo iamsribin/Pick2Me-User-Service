@@ -5,19 +5,19 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 255, nullable: true }) // nullable just for testing
   name!: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, type: 'varchar', length: 255, nullable: true })
   email!: string;
 
   @Column({ unique: true, type: 'bigint' })
   mobile!: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   user_image!: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   referral_code!: string;
 
   @CreateDateColumn()
@@ -26,7 +26,7 @@ export class User {
   @Column({ type: 'enum', enum: ['Good', 'Block'], default: 'Good' })
   account_status!: 'Good' | 'Block';
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   reason!: string;
 
   @Column({ type: 'enum', enum: ['Admin', 'User'], default: 'User' })

@@ -1,7 +1,7 @@
 import { injectable } from 'inversify';
-import { User } from '../../model/user-schema';
+import { User } from '@/model/user-schema';
 import { IUserRepository } from '../interface/i-user-repository';
-import { AppDataSource } from '../../config/sql-database';
+import { AppDataSource } from '@/config/sql-database';
 import { SqlBaseRepository } from '@Pick2Me/shared';
 
 @injectable()

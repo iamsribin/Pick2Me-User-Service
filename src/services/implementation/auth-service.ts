@@ -1,21 +1,21 @@
 import { IRegistrationService } from '../interfaces/i-auth-service';
-import { generateReferralCode } from '../../utils/refferalCodeGenarate';
-import { sendOtp } from '../../utils/otpSending';
-import { RegistrationValidation } from '../../utils/sql-validation/registrationValidation';
-import { RegistrationTransformer } from '../../dto/transformer/registration-transformer.dto';
-import { REGISTRATION_CONSTANTS } from '../../constants/registration-constants';
-import { RegisterUserDataDto } from '../../dto/request/registration-request.dto';
-import { IUserRepository } from '../../repositories/interface/i-user-repository';
+import { generateReferralCode } from '@/utils/refferalCodeGenarate';
+import { sendOtp } from '@/utils/otpSending';
+import { RegistrationValidation } from '@/utils/sql-validation/registrationValidation';
+import { RegistrationTransformer } from '@/dto/transformer/registration-transformer.dto';
+import { REGISTRATION_CONSTANTS } from '@/constants/registration-constants';
+import { RegisterUserDataDto } from '@/dto/request/registration-request.dto';
+import { IUserRepository } from '@/repositories/interface/i-user-repository';
 import { inject, injectable } from 'inversify';
-import { TYPES } from '../../types/container-type';
-import { LoginResponseDto } from '../../dto/response/login-response.dto';
-import { sanitizeService } from '../../utils/sql-validation/sanitization';
-import generateOTP from '../../utils/generateOtp';
+import { TYPES } from '@/types/container-type';
+import { LoginResponseDto } from '@/dto/response/login-response.dto';
+import { sanitizeService } from '@/utils/sql-validation/sanitization';
+import generateOTP from '@/utils/generateOtp';
 import {
   RegisterResponseDto,
   CheckUserResponseDto,
   ResendOtpResponseDto,
-} from '../../dto/response/registration-response.dto';
+} from '@/dto/response/registration-response.dto';
 import {
   AccessPayload,
   BadRequestError,
@@ -28,7 +28,7 @@ import {
   UnauthorizedError,
   UserRegisteredEvent,
 } from '@Pick2Me/shared';
-import {UserEventProducer } from '../../event/publisher';
+import { UserEventProducer } from '@/event/publisher';
 
 @injectable()
 export class RegistrationService implements IRegistrationService {
@@ -76,7 +76,7 @@ export class RegistrationService implements IRegistrationService {
         token: accessToken,
         refreshToken: refreshToken,
       };
-    } catch (error) {      
+    } catch (error) {
       if (error instanceof HttpError) throw error;
       throw InternalError('something went wrong');
     }
@@ -149,16 +149,16 @@ export class RegistrationService implements IRegistrationService {
         mobile: userData.mobile,
         referral_code,
         user_image: userData.user_image,
-        joining_date:new Date()
+        joining_date: new Date(),
       };
 
       const savedUser = await this._userRepo.create(newUserData);
 
-      const event: UserRegisteredEvent ={
+      const event: UserRegisteredEvent = {
         userId: savedUser?.id.toString() as string,
         email: savedUser?.email.toString() as string,
         createdAt: new Date().toISOString(),
-      }
+      };
 
       // Publish event to Payment Service
       await UserEventProducer.publishUserCreatedEvent(event);

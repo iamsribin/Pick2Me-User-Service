@@ -13,13 +13,13 @@ export class UserDto {
   @Expose()
   mobile!: string;
 
-  @Expose({name:"user_image"})
+  @Expose({ name: 'user_image' })
   avatar!: string;
 
-  @Expose({ name: "account_status" })
-  accountStatus!: "Good" | "Block";
+  @Expose({ name: 'account_status' })
+  accountStatus!: 'Good' | 'Block';
 
-  @Expose({ name: "joining_date" })
+  @Expose({ name: 'joining_date' })
   @Transform(({ value }) => (value ? new Date(value).toLocaleDateString() : value))
   joiningDate!: string;
 }
@@ -58,4 +58,3 @@ export class PaginatedUserListDTO {
   @Expose()
   pagination!: PaginationTransformerDto;
 }
-

@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { inject, injectable } from 'inversify';
-import { IUserService } from '../services/interfaces/i-user-service';
-import { TYPES } from '../types/container-type';
-import { uploadToS3Public } from '../utils/s3';
+import { IUserService } from '@/services/interfaces/i-user-service';
+import { TYPES } from '@/types/container-type';
+import { uploadToS3Public } from '@/utils/s3';
 import { BadRequestError, UnauthorizedError } from '@Pick2Me/shared';
 
 @injectable()

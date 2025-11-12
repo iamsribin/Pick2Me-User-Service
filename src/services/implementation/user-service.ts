@@ -1,10 +1,10 @@
 import { inject, injectable } from 'inversify';
-import { AvatarData, UserProfileDto } from '../../dto/response/user-response.dto';
-import { IUserRepository } from '../../repositories/interface/i-user-repository';
+import { AvatarData, UserProfileDto } from '@/dto/response/user-response.dto';
+import { IUserRepository } from '@/repositories/interface/i-user-repository';
 import { IUserService } from '../interfaces/i-user-service';
-import { TYPES } from '../../types/container-type';
-import { REGISTRATION_CONSTANTS } from '../../constants/registration-constants';
-import { deleteFromS3, uploadToS3Public } from '../../utils/s3';
+import { TYPES } from '@/types/container-type';
+import { REGISTRATION_CONSTANTS } from '@/constants/registration-constants';
+import { deleteFromS3, uploadToS3Public } from '@/utils/s3';
 import {
   BadRequestError,
   HttpError,

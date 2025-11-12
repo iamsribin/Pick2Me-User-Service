@@ -1,7 +1,7 @@
 import express from 'express';
-import container from '../config/inversify.config';
-import { AdminController } from '../controller/admin-controller';
-import { TYPES } from '../types/container-type';
+import container from '@/config/inversify.config';
+import { AdminController } from '@/controller/admin-controller';
+import { TYPES } from '@/types/container-type';
 import { catchAsync, verifyGatewayJwt } from '@Pick2Me/shared';
 
 const adminUserController = container.get<AdminController>(TYPES.AdminController);

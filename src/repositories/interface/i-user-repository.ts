@@ -1,5 +1,5 @@
 import { ISqlBaseRepository } from '@Pick2Me/shared';
-import { IUser } from '../../entities/user.interface';
+import { IUser } from '@/entities/user.interface';
 
 export interface IUserRepository extends ISqlBaseRepository<IUser> {
   findByMobile(mobile: string): Promise<IUser | null>;

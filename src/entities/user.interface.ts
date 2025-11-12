@@ -1,4 +1,3 @@
-import { IWalletTransaction } from './wallet-transaction.interface';
 
 export interface IUser {
   id: string;
@@ -15,5 +14,4 @@ export interface IUser {
   wallet_balance?: number;
   cancel_ride_count?: number;
   completed_ride_count?: number;
-  transactions?: IWalletTransaction[];
 }

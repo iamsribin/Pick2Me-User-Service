@@ -1,10 +1,10 @@
-import { RegisterUserDataDto } from '../../dto/request/registration-request.dto';
-import { LoginResponseDto } from '../../dto/response/login-response.dto';
+import { RegisterUserDataDto } from '@/dto/request/registration-request.dto';
+import { LoginResponseDto } from '@/dto/response/login-response.dto';
 import {
   RegisterResponseDto,
   CheckUserResponseDto,
   ResendOtpResponseDto,
-} from '../../dto/response/registration-response.dto';
+} from '@/dto/response/registration-response.dto';
 
 export interface IRegistrationService {
   registerUser(userData: RegisterUserDataDto): Promise<RegisterResponseDto>;

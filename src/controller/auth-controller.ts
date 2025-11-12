@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { inject, injectable } from 'inversify';
-import { IRegistrationService } from '../services/interfaces/i-auth-service';
+import { IRegistrationService } from '@/services/interfaces/i-auth-service';
 import { ConflictError, StatusCode } from '@Pick2Me/shared';
-import { uploadToS3Public } from '../utils/s3';
-import { TYPES } from '../types/container-type';
+import { uploadToS3Public } from '@/utils/s3';
+import { TYPES } from '@/types/container-type';
 
 @injectable()
 export class RegistrationController {
@@ -19,7 +19,6 @@ export class RegistrationController {
 
       let user_image =
         'https://retro-routes-store.s3.eu-north-1.amazonaws.com/1762197847863-Gemini_Generated_Image_dmzlyqdmzlyqdmzl.png';
-
 
       if (file) {
         user_image = await uploadToS3Public(file);

@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "main": "server.ts",
   "scripts": {
-    "start": "nodemon ./src/server.ts",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc && tsc-alias && tsc-esm-fix",
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts",
     "format": "prettier --write \"src/**/*.{js,ts,tsx,json,css,md}\"",
     "lint": "eslint . --ext .ts,.js",
     "lint:fix": "eslint . --ext .ts,.js --fix"
@@ -12,6 +13,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "type": "module",
   "description": "",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.744.0",
@@ -65,6 +67,9 @@
     "prettier": "^3.6.2",
     "sass": "^1.85.0",
     "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.16",
+    "tsc-esm-fix": "^3.1.2",
+    "tsx": "^4.20.6",
     "typescript": "^5.8.0-dev.20250214",
     "typescript-eslint": "^8.46.3"
   }

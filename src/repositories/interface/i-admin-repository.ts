@@ -1,4 +1,4 @@
-import { IUser } from '../../entities/user.interface';
+import { IUser } from '@/entities/user.interface';
 
 export interface IAdminRepository {
   findUsersByStatusWithPagination(
