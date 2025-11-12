@@ -1,5 +1,5 @@
 import { IRegistrationService } from '../interfaces/i-auth-service';
-import { generateReferralCode } from '@/utils/refferalCodeGenarate';
+import { generateReferralCode } from '@/utils/referralCodeGenerator';
 import { sendOtp } from '@/utils/otpSending';
 import { RegistrationValidation } from '@/utils/sql-validation/registrationValidation';
 import { RegistrationTransformer } from '@/dto/transformer/registration-transformer.dto';
@@ -11,6 +11,7 @@ import { TYPES } from '@/types/container-type';
 import { LoginResponseDto } from '@/dto/response/login-response.dto';
 import { sanitizeService } from '@/utils/sql-validation/sanitization';
 import generateOTP from '@/utils/generateOtp';
+import { UserEventProducer } from '@/event/user.producer';
 import {
   RegisterResponseDto,
   CheckUserResponseDto,
@@ -28,7 +29,6 @@ import {
   UnauthorizedError,
   UserRegisteredEvent,
 } from '@Pick2Me/shared';
-import { UserEventProducer } from '@/event/publisher';
 
 @injectable()
 export class RegistrationService implements IRegistrationService {
