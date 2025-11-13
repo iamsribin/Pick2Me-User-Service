@@ -46,4 +46,12 @@ export class UserRepository extends SqlBaseRepository<User> implements IUserRepo
       return null;
     }
   }
+
+  async findByReferralCode(code: string): Promise<User | null> {
+    try {
+      return await this.findOne({ referral_code: code });
+    } catch {
+      return null;
+    }
+  }
 }

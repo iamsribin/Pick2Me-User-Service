@@ -9,4 +9,6 @@ export interface IUserRepository extends ISqlBaseRepository<IUser> {
   checkUserExists(mobile: string, email: string): Promise<IUser | null>;
 
   getUserWithTransactions(id: string): Promise<IUser | null>;
+
+  findByReferralCode(code: string): Promise<IUser | null>
 }

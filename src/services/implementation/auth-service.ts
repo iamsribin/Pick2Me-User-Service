@@ -163,6 +163,14 @@ export class RegistrationService implements IRegistrationService {
       // Publish event to Payment Service
       await UserEventProducer.publishUserCreatedEvent(event);
 
+      if (userData.reffered_Code) {
+        const referredUser = await this._userRepo.findByReferralCode(userData.reffered_Code);
+        if (referredUser) {
+          console.log('Referred user found:', referredUser.id);
+          await UserEventProducer.addedRewardAmount(referredUser.id);
+        }
+      }
+
       if (!savedUser) throw InternalError('Failed to create user');
 
       return RegistrationTransformer.transformToRegisterResponse({

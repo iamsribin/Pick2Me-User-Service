@@ -5,6 +5,7 @@ import { IUserService } from '../interfaces/i-user-service';
 import { TYPES } from '@/types/container-type';
 import { REGISTRATION_CONSTANTS } from '@/constants/registration-constants';
 import { deleteFromS3, uploadToS3Public } from '@/utils/s3';
+import { fetchUserWalletBalanceAndTransactions } from '@/grpc/client/payment-client';
 import {
   BadRequestError,
   HttpError,
@@ -12,8 +13,9 @@ import {
   IResponse,
   StatusCode,
   UnauthorizedError,
+  UserRegisteredEvent,
 } from '@Pick2Me/shared';
-import { fetchUserWalletBalanceAndTransactions } from '@/grpc/client/payment-client';
+import { UserEventProducer } from '@/event/user.producer';
 
 @injectable()
 export class UserService implements IUserService {
@@ -37,7 +39,7 @@ export class UserService implements IUserService {
         joiningDate: user.joining_date,
         accountStatus: user.account_status,
         wallet: {
-          balance: walletBalanceAndTransactions.balance,
+          balance: Number(walletBalanceAndTransactions.balance),
           transactions: walletBalanceAndTransactions.transactions,
         },
         rideDetails: {
