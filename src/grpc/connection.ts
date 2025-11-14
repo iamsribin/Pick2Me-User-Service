@@ -1,4 +1,4 @@
-import { paymentProto } from '@Pick2Me/shared';
+import { paymentProto } from '@Pick2Me/shared/protos';
 import * as grpc from '@grpc/grpc-js';
 
 const paymentClient = new (paymentProto as any).PaymentService(

@@ -1,4 +1,4 @@
-import { ISqlBaseRepository } from '@Pick2Me/shared';
+import { ISqlBaseRepository } from '@Pick2Me/shared/sql';
 import { IUser } from '@/entities/user.interface';
 
 export interface IUserRepository extends ISqlBaseRepository<IUser> {
@@ -10,5 +10,5 @@ export interface IUserRepository extends ISqlBaseRepository<IUser> {
 
   getUserWithTransactions(id: string): Promise<IUser | null>;
 
-  findByReferralCode(code: string): Promise<IUser | null>
+  findByReferralCode(code: string): Promise<IUser | null>;
 }

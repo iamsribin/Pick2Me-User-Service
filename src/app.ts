@@ -2,10 +2,9 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import { authRouter } from '@/routes/authRouter';
 import { userRouter } from '@/routes/userRouter';
-import { errorHandler } from '@Pick2Me/shared';
+import { errorHandler } from '@Pick2Me/shared/errors';
 import { adminRoute } from '@/routes/adminRoutes';
-import pino from 'pino';
-import pinoHttp from 'pino-http';
+
 
 const app = express();
 

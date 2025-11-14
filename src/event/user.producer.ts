@@ -1,4 +1,5 @@
-import { EXCHANGES, RabbitMQ, ROUTING_KEYS, UserRegisteredEvent } from '@Pick2Me/shared';
+import { UserRegisteredEvent } from '@Pick2Me/shared/interfaces';
+import { EXCHANGES, RabbitMQ, ROUTING_KEYS } from '@Pick2Me/shared/messaging';
 
 const url = process.env.RABBIT_URL!;
 

@@ -2,7 +2,7 @@ import { injectable } from 'inversify';
 import { User } from '@/model/user-schema';
 import { IUserRepository } from '../interface/i-user-repository';
 import { AppDataSource } from '@/config/sql-database';
-import { SqlBaseRepository } from '@Pick2Me/shared';
+import { SqlBaseRepository } from '@Pick2Me/shared/sql';
 
 @injectable()
 export class UserRepository extends SqlBaseRepository<User> implements IUserRepository {

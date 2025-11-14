@@ -6,7 +6,7 @@ import app from '@/app';
 import { startGrpcServer } from '@/grpc/server';
 import { connectSQL } from '@/config/sql-database';
 import { isEnvDefined } from '@/utils/envChecker';
-import { createRedisService } from '@Pick2Me/shared';
+import { createRedisService } from '@Pick2Me/shared/redis';
 
 const startServer = async () => {
   try {

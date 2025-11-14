@@ -10,12 +10,9 @@ import {
   BadRequestError,
   HttpError,
   InternalError,
-  IResponse,
-  StatusCode,
   UnauthorizedError,
-  UserRegisteredEvent,
-} from '@Pick2Me/shared';
-import { UserEventProducer } from '@/event/user.producer';
+} from '@Pick2Me/shared/errors';
+import { IResponse, StatusCode } from '@Pick2Me/shared/interfaces';
 
 @injectable()
 export class UserService implements IUserService {

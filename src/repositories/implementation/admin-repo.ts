@@ -1,11 +1,9 @@
 import { injectable } from 'inversify';
 import { IAdminRepository } from '../interface/i-admin-repository';
-import { ILike } from 'typeorm';
+import { FindOptionsWhere, ILike } from 'typeorm';
 import { AppDataSource } from '@/config/sql-database';
-import { SqlBaseRepository } from '@Pick2Me/shared';
+import { SqlBaseRepository } from '@Pick2Me/shared/sql';
 import { User } from '@/model/user-schema';
-import { FilterQuery } from 'mongoose';
-import { IUser } from '@/entities/user.interface';
 
 @injectable()
 export class AdminRepository extends SqlBaseRepository<User> implements IAdminRepository {
@@ -22,7 +20,7 @@ export class AdminRepository extends SqlBaseRepository<User> implements IAdminRe
     try {
       const offset = (page - 1) * limit;
 
-      const baseWhere: FilterQuery<IUser> = {
+      const baseWhere: FindOptionsWhere<User> = {
         account_status: status,
         role: 'User',
       };

@@ -1,5 +1,5 @@
-import { AdminController } from '../../controller/admin-controller';
-import { RegistrationController } from '../../controller/auth-controller';
+import { AdminController } from '@/controller/admin-controller';
+import { RegistrationController } from '@/controller/auth-controller';
 
 type Handlers = {
   registrationController: RegistrationController;

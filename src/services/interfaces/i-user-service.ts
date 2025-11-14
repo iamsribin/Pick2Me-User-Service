@@ -1,4 +1,4 @@
-import { IResponse } from '@Pick2Me/shared';
+import { IResponse } from '@Pick2Me/shared/interfaces';
 import { AvatarData, UserProfileDto } from '@/dto/response/user-response.dto';
 
 export interface IUserService {

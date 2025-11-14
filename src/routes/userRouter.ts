@@ -2,8 +2,9 @@ import express from 'express';
 import { upload } from '@/middleware/multer';
 import container from '@/config/inversify.config';
 import { UserController } from '@/controller/user-controller';
-import { catchAsync, verifyGatewayJwt } from '@Pick2Me/shared';
+import { verifyGatewayJwt } from '@Pick2Me/shared/auth';
 import { TYPES } from '@/types/container-type';
+import { catchAsync } from '@Pick2Me/shared/utils';
 
 const userController = container.get<UserController>(TYPES.UserController);
 

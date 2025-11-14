@@ -18,17 +18,16 @@ import {
   ResendOtpResponseDto,
 } from '@/dto/response/registration-response.dto';
 import {
-  AccessPayload,
   BadRequestError,
   ConflictError,
-  generateJwtToken,
-  getRedisService,
   HttpError,
   InternalError,
   NotFoundError,
   UnauthorizedError,
-  UserRegisteredEvent,
-} from '@Pick2Me/shared';
+} from '@Pick2Me/shared/errors';
+import { generateJwtToken, AccessPayload } from '@Pick2Me/shared/auth';
+import { UserRegisteredEvent } from '@Pick2Me/shared/interfaces';
+import { getRedisService } from '@Pick2Me/shared/redis';
 
 @injectable()
 export class RegistrationService implements IRegistrationService {

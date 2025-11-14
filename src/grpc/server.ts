@@ -1,5 +1,5 @@
 import * as grpc from '@grpc/grpc-js';
-import { userServiceDescriptor } from '@Pick2Me/shared';
+import { userServiceDescriptor } from '@Pick2Me/shared/protos';
 import { createUserHandlers } from './handlers/user-handlers';
 import container from '@/config/inversify.config';
 import { TYPES } from '@/types/container-type';

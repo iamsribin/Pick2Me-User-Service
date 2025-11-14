@@ -2,7 +2,7 @@ import express from 'express';
 import { upload } from '@/middleware/multer';
 import container from '@/config/inversify.config';
 import { RegistrationController } from '@/controller/auth-controller';
-import { catchAsync } from '@Pick2Me/shared';
+import { catchAsync } from '@Pick2Me/shared/utils';
 import { TYPES } from '@/types/container-type';
 
 const registrationController = container.get<RegistrationController>(TYPES.RegistrationController);

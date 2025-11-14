@@ -1,4 +1,4 @@
-import { InternalError } from '@Pick2Me/shared';
+import { InternalError } from '@Pick2Me/shared/errors';
 import { sendMail } from './nodeMailer';
 
 export const sendOtp = async (email: string, name: string, otp: string) => {
