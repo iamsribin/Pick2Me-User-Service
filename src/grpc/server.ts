@@ -3,37 +3,36 @@ import { userServiceDescriptor } from '@Pick2Me/shared/protos';
 import { createUserHandlers } from './handlers/user-handlers';
 import container from '@/config/inversify.config';
 import { TYPES } from '@/types/container-type';
-import { AdminController } from '@/controller/admin-controller';
-import { RegistrationController } from '@/controller/auth-controller';
+import { GrpcController } from '@/controller/grpc-controller';
 
-const registrationController = container.get<RegistrationController>(TYPES.RegistrationController);
-const adminController = container.get<AdminController>(TYPES.AdminController);
+const grpcController = container.get<GrpcController>(TYPES.GrpcController);
 
 if (!userServiceDescriptor) {
   console.error('userServiceDescriptor is missing. Inspect loaded proto package.');
   process.exit(1);
 }
 
-const handlers = createUserHandlers({
-  registrationController,
-  adminController,
-});
+const handlers = createUserHandlers({ grpcController });
 
 export const startGrpcServer = () => {
   try {
     const server = new grpc.Server();
 
-    // Register user service gRPC functions
     server.addService(userServiceDescriptor, handlers);
 
     server.bindAsync(
-      process.env.GRPC_URL as string,
+      process.env.USER_GRPC_URL as string,
       grpc.ServerCredentials.createInsecure(),
-      () => {
-        console.log(`GRPC server for user service running on port ${process.env.GRPC_URL}`);
+      (err, port) => {
+        if (err) {
+          console.error('gRPC server bind error:', err);
+          process.exit(1);
+        }
+        console.log(`gRPC server for user service started on port ${port}`);
       }
     );
   } catch (err) {
-    console.log(err);
+    console.log('startGrpcServer err=', err);
   }
 };
+

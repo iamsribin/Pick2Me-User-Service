@@ -16,6 +16,7 @@ import {
 import { Coordinates, IResponse, StatusCode } from '@Pick2Me/shared/interfaces';
 import { UserEventProducer } from '@/event/user.producer';
 import { SavedLocation } from '@/types/place-type';
+import { UserInfo } from '@/types/user';
 
 @injectable()
 export class UserService implements IUserService {
@@ -136,6 +137,24 @@ export class UserService implements IUserService {
       const places = user?.saved_locations;
 
       return places ? places : [];
+    } catch (error) {
+      if (error instanceof HttpError) throw error;
+      throw InternalError('something went wrong');
+    }
+  }
+
+  async fetchUserInfoForBookingRide(userId: string): Promise<UserInfo> {
+    try {
+      const user = await this._userRepo.findById(userId);
+      if (!user) throw NotFoundError('user not found');
+
+      const userInfo: UserInfo = {
+        userId: user.id,
+        userName: user.name,
+        userNumber: user.mobile,
+        userProfile: user.user_image,
+      };
+      return userInfo;
     } catch (error) {
       if (error instanceof HttpError) throw error;
       throw InternalError('something went wrong');

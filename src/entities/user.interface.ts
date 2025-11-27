@@ -6,7 +6,7 @@ export interface IUser {
   email: string;
   mobile: string;
   // password: string;
-  user_image?: string;
+  user_image: string;
   referral_code?: string;
   joining_date: Date;
   account_status: 'Good' | 'Block';

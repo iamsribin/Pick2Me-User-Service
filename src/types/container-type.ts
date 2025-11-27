@@ -1,3 +1,4 @@
+
 export const TYPES = {
   // Repositories
   UserRepository: Symbol.for('UserRepository'),
@@ -12,6 +13,7 @@ export const TYPES = {
   UserController: Symbol.for('UserController'),
   RegistrationController: Symbol.for('RegistrationController'),
   AdminController: Symbol.for('AdminController'),
+  GrpcController: Symbol.for('GrpcController'),
 
   // Utilities
   AuthService: Symbol.for('AuthService'),

@@ -16,6 +16,7 @@ import { AdminController } from '@/controller/admin-controller';
 import { IUserRepository } from '@/repositories/interface/i-user-repository';
 import { IAdminRepository } from '@/repositories/interface/i-admin-repository';
 import { TYPES } from '@/types/container-type';
+import { GrpcController } from '@/controller/grpc-controller';
 
 export const container = new Container();
 
@@ -32,5 +33,6 @@ container.bind(TYPES.AdminService).to(AdminService).inSingletonScope();
 container.bind(TYPES.UserController).to(UserController).inSingletonScope();
 container.bind(TYPES.RegistrationController).to(RegistrationController).inSingletonScope();
 container.bind(TYPES.AdminController).to(AdminController).inSingletonScope();
+container.bind(TYPES.GrpcController).to(GrpcController).inSingletonScope();
 
 export default container;

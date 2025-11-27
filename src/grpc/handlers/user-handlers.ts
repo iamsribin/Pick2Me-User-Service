@@ -1,15 +1,13 @@
-import { AdminController } from '@/controller/admin-controller';
-import { RegistrationController } from '@/controller/auth-controller';
+import { GrpcController } from '@/controller/grpc-controller';
 
 type Handlers = {
-  registrationController: RegistrationController;
-  adminController: AdminController;
+  grpcController: GrpcController;
 };
 
 export function createUserHandlers(controllers: Handlers) {
-  const { registrationController, adminController } = controllers;
+  const { grpcController } = controllers;
 
   return {
-    FetchUserInfoForBookingRide: adminController.getUserData,
+    FetchUserInfoForBookingRide: grpcController.fetchUserInfoForBookingRide,
   };
 }
