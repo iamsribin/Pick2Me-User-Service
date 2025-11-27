@@ -9,5 +9,7 @@ type Handlers = {
 export function createUserHandlers(controllers: Handlers) {
   const { registrationController, adminController } = controllers;
 
-  return {};
+  return {
+    FetchUserInfoForBookingRide: adminController.getUserData,
+  };
 }

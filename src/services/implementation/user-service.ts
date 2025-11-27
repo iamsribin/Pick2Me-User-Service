@@ -123,7 +123,7 @@ export class UserService implements IUserService {
       await this._userRepo.update(userId, { saved_locations: existing });
     } catch (error) {
       console.log(error);
-      
+
       if (error instanceof HttpError) throw error;
       throw InternalError('something went wrong');
     }
