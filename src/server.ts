@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import app from '@/app';
-import { createRedisService } from '@Pick2Me/shared/redis';
+import { createRedisService } from '@pick2me/shared/redis';
 import { startGrpcServer } from '@/grpc/server';
 import { connectSQL } from '@/config/sql-database';
 import { isEnvDefined } from '@/utils/envChecker';

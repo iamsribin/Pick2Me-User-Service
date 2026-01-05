@@ -1,5 +1,5 @@
 import { IUser } from '@/entities/user.interface';
-import { ISqlBaseRepository } from '@Pick2Me/shared/sql';
+import { ISqlBaseRepository } from '@pick2me/shared/sql';
 
 export interface IAdminRepository extends ISqlBaseRepository<IUser> {
   findUsersByStatusWithPagination(

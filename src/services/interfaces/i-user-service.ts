@@ -1,4 +1,4 @@
-import { Coordinates, IResponse } from '@Pick2Me/shared/interfaces';
+import { Coordinates, IResponse } from '@pick2me/shared/interfaces';
 import { AvatarData, UserProfileDto } from '@/dto/response/user-response.dto';
 import { SavedLocation } from '@/types/place-type';
 import { UserInfo } from '@/types/user';

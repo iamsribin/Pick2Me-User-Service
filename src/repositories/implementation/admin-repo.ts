@@ -2,7 +2,7 @@ import { injectable } from 'inversify';
 import { IAdminRepository } from '../interface/i-admin-repository';
 import { FindOptionsWhere, ILike } from 'typeorm';
 import { AppDataSource } from '@/config/sql-database';
-import { SqlBaseRepository } from '@Pick2Me/shared/sql';
+import { SqlBaseRepository } from '@pick2me/shared/sql';
 import { User } from '@/model/user-schema';
 
 @injectable()

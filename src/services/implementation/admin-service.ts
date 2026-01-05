@@ -7,8 +7,8 @@ import { IUserDto } from '@/dto/response/profile.dto';
 import { IAdminRepository } from '@/repositories/interface/i-admin-repository';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@/types/container-type';
-import { IResponse, StatusCode } from '@Pick2Me/shared/interfaces';
-import { InternalError } from '@Pick2Me/shared/errors';
+import { IResponse, StatusCode } from '@pick2me/shared/interfaces';
+import { InternalError } from '@pick2me/shared/errors';
 
 @injectable()
 export class AdminService implements IAdminService {

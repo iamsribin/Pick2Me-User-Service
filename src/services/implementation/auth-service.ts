@@ -24,10 +24,10 @@ import {
   InternalError,
   NotFoundError,
   UnauthorizedError,
-} from '@Pick2Me/shared/errors';
-import { generateJwtToken, AccessPayload } from '@Pick2Me/shared/auth';
-import { UserRegisteredEvent } from '@Pick2Me/shared/interfaces';
-import { getRedisService } from '@Pick2Me/shared/redis';
+} from '@pick2me/shared/errors';
+import { generateJwtToken, AccessPayload } from '@pick2me/shared/auth';
+import { UserRegisteredEvent } from '@pick2me/shared/interfaces';
+import { getRedisService } from '@pick2me/shared/redis';
 
 @injectable()
 export class RegistrationService implements IRegistrationService {

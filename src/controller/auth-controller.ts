@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { inject, injectable } from 'inversify';
 import { IRegistrationService } from '@/services/interfaces/i-auth-service';
-import { ConflictError } from '@Pick2Me/shared/errors';
-import { StatusCode } from '@Pick2Me/shared/interfaces';
+import { ConflictError } from '@pick2me/shared/errors';
+import { StatusCode } from '@pick2me/shared/interfaces';
 import { uploadToS3Public } from '@/utils/s3';
 import { TYPES } from '@/types/container-type';
 

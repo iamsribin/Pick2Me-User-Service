@@ -1,4 +1,4 @@
-import { Coordinates } from '@Pick2Me/shared/interfaces';
+import { Coordinates } from '@pick2me/shared/interfaces';
 
 export interface SavedLocation {
   name: string;

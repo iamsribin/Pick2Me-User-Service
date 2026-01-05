@@ -12,8 +12,8 @@ import {
   InternalError,
   NotFoundError,
   UnauthorizedError,
-} from '@Pick2Me/shared/errors';
-import { Coordinates, IResponse, StatusCode } from '@Pick2Me/shared/interfaces';
+} from '@pick2me/shared/errors';
+import { Coordinates, IResponse, StatusCode } from '@pick2me/shared/interfaces';
 import { UserEventProducer } from '@/event/user.producer';
 import { SavedLocation } from '@/types/place-type';
 import { UserInfo } from '@/types/user';

@@ -1,4 +1,4 @@
-import { ISqlBaseRepository } from '@Pick2Me/shared/sql';
+import { ISqlBaseRepository } from '@pick2me/shared/sql';
 import { IUser } from '@/entities/user.interface';
 
 export interface IUserRepository extends ISqlBaseRepository<IUser> {
