@@ -1,0 +1,17 @@
+services:
+  user-service:
+    image: pick2me-user-service:1.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: user-service
+    env_file:
+      - .env
+    ports:
+      - "3001:3001"
+    networks:
+      - miro-backend
+
+networks:
+  miro-backend:
+    external: true
